@@ -5,16 +5,27 @@
 | 버전 | 일자 | 작성자 | 상태 | 요약 |
 |------|------|--------|------|------|
 | v0.1 | 2026-11-04 | jtaewu | 초안 | 최초 작성 |
+| v0.2 | 2026-11-04 | jtaewu | 초안 | 인증 변경 반영: HS384 Access Token + Refresh Token(rotation), client 자동 갱신 |
+| v0.3 | 2026-11-04 | jtaewu | 초안 | 문서 간 불일치 정리: NP-14 503, 루트 트리 docs 설명, PP-16 상태 |
 
 ## 변경 이력
 
 | 버전 | 일자 | 변경 섹션 | 구분 | 변경 내용 | 작성자 |
 |------|------|-----------|------|-----------|--------|
 | v0.1 | 2026-11-04 | 전체 | 신규 | 프로젝트 구조 설계 원칙 초안 작성 | jtaewu |
+| v0.2 | 2026-11-04 | 머리말 | 수정 | 기준 문서 버전 갱신(PRD v0.5, 시나리오 v0.4, 와이어프레임 v0.3) | jtaewu |
+| v0.2 | 2026-11-04 | 3장 | 수정 | LP-08·LP-09: client 401 시 갱신 1회(single-flight)·재시도, 만료 안내는 갱신 실패 시에만. 의존성 표 jsonwebtoken 설명 | jtaewu |
+| v0.2 | 2026-11-04 | 4장 | 수정 | NP-13 auth 동사 경로 예시(refresh, logout), TP-13·TP-15 필수 테스트 대상 추가 | jtaewu |
+| v0.2 | 2026-11-04 | 5장 | 수정 | SP-03 JWT·Refresh 쿠키 규칙 재작성, `JWT_SECRET` 64자 이상(env 표) | jtaewu |
+| v0.2 | 2026-11-04 | 6장 | 수정 | 디렉토리 트리에 `refreshTokens.repository.js`, 토큰 TTL 상수 위치(`lib/jwt.js`) 명시 | jtaewu |
+| v0.2 | 2026-11-04 | 7장 | 수정 | PP-22 재작성(페이로드·쿠키 이름·TTL 상수), PP-23 추가 | jtaewu |
+| v0.3 | 2026-11-04 | 3장 | 수정 | NP-14에 헬스체크 실패 503 추가(SP-12와 일치) | jtaewu |
+| v0.3 | 2026-11-04 | 6장 | 수정 | 6.1 저장소 루트 트리의 `docs/` 설명을 '1~5번 문서'에서 '1~8번 문서, schema.sql'로 정정 | jtaewu |
+| v0.3 | 2026-11-04 | 7장 | 수정 | PP-16: 계획 문서가 `8-plan.md`로 확정됨을 반영하고 스킬 경로 수정은 8번 D-01로 연결(미결 유지) | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.4), `3-user-scenario.md`(v0.3), `4-wireframe.md`(v0.2)를 기준으로 한다.
+> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.5), `3-user-scenario.md`(v0.4), `4-wireframe.md`(v0.3)를 기준으로 한다.
 
 ## 1. 개요와 공통 최상위 원칙
 
@@ -88,8 +99,8 @@
 
 | ID | 원칙 | 근거 |
 |----|------|------|
-| LP-08 | 모든 API 호출은 `api/client.ts`의 단일 `fetch` 래퍼를 거친다. `credentials: 'include'`, JSON 입출력, 실패 시 `ApiError{status, code, message, fields}`를 throw한다. 컴포넌트에서 `fetch`를 직접 쓰지 않는다. | PA-01, NFR-10 |
-| LP-09 | 401 처리는 한 곳(`app/queryClient.ts`의 Query/Mutation 전역 `onError`)에서 한다. 오류 코드 `UNAUTHENTICATED`일 때만 로그인 화면(SC-02)으로 이동하며, 로그인 요청의 실패(`INVALID_CREDENTIALS`)는 이동 대상이 아니다. 만료 안내 문구(WA-21)는 이미 인증된 상태에서 401을 받은 경우에만 `sessionStore`의 플래그로 표시한다. 앱 진입 시 `me` 조회의 401은 안내 없이 이동한다. | FR-02, SN-03, WA-21 |
+| LP-08 | 모든 API 호출은 `api/client.ts`의 단일 `fetch` 래퍼를 거친다. `credentials: 'include'`, JSON 입출력, 실패 시 `ApiError{status, code, message, fields}`를 throw한다. 컴포넌트에서 `fetch`를 직접 쓰지 않는다. `/api/auth/*`가 아닌 요청이 401 `UNAUTHENTICATED`를 받으면 `POST /api/auth/refresh`를 한 번 호출하고, 성공하면 원래 요청을 한 번만 재시도한다. 동시에 여러 요청이 401을 받아도 갱신 요청은 하나만 보내고 나머지는 그 결과를 기다린다(single-flight). 갱신에 실패하면 원래 401을 throw한다. | PA-01, NFR-10 |
+| LP-09 | 401 처리는 한 곳(`app/queryClient.ts`의 Query/Mutation 전역 `onError`)에서 한다. client의 갱신·재시도(LP-08)까지 실패해 던져진 오류 코드 `UNAUTHENTICATED`일 때만 로그인 화면(SC-02)으로 이동하며, 로그인 요청의 실패(`INVALID_CREDENTIALS`)는 이동 대상이 아니다. 만료 안내 문구(WA-21)는 이미 인증된 상태에서 갱신 실패로 401을 받은 경우에만(Access Token 만료만으로는 표시하지 않음) `sessionStore`의 플래그로 표시한다. 앱 진입 시 `me` 조회의 401은 안내 없이 이동한다. | FR-02, SN-03, WA-21 |
 | LP-10 | 4xx에는 TanStack Query 재시도를 하지 않는다(`retry`는 네트워크·5xx만). | NFR-01 |
 | LP-11 | 쿼리 키는 기능별 키 팩토리로 만들고, 상태가 `today`에 의존하는 조회(목록·캘린더)는 키에 `today`를 포함한다. 변경(mutation) 성공 후에는 관련 키를 무효화해 다시 가져온다. | PA-06, BR-13 |
 | LP-12 | **상태 관리 경계.** 서버 데이터(할일·카테고리·내 정보·현재 사용자)는 TanStack Query만 가진다. Zustand는 클라이언트 UI 상태(할일 목록 필터·페이지, 캘린더 뷰 종류·기준일, 세션 만료 안내 플래그)만 가진다. 서버 데이터를 Zustand에 복제하지 않으며, 폼 입력값은 컴포넌트 로컬 상태다. | PRD 8장, WA-09, WA-17 |
@@ -109,7 +120,7 @@
 | BE 런타임 | `express`(v5), `pg` | 고정 제약 |
 | BE 런타임 | `zod` | 경계 입력 검증(FR-13). 스키마를 한 곳에서 선언해 타입 변환·필드별 오류를 얻는다 |
 | BE 런타임 | `bcrypt` | 비밀번호 해시(PA-02, NFR-05). 네이티브 구현이라 이벤트 루프를 막지 않는다(PP-10) |
-| BE 런타임 | `jsonwebtoken` | JWT 발급·검증(PA-01) |
+| BE 런타임 | `jsonwebtoken` | Access Token(JWT, `HS384`) 서명·검증(PA-01). Refresh Token은 JWT가 아니라 `crypto`로 생성한다 |
 | BE 런타임 | `cookie-parser`, `cors` | 쿠키 읽기, 허용 출처 제한(NFR-10) |
 | BE 런타임 | `pino` | 구조화 로그와 민감 필드 `redact`(NFR-12) |
 | BE 개발 | `vitest`, `@vitest/coverage-v8`, `supertest` | 테스트·커버리지·HTTP 통합 테스트(TP-04) |
@@ -150,8 +161,8 @@
 | ID | 원칙 | 근거 |
 |----|------|------|
 | NP-12 | **snake_case ↔ camelCase 변환은 `backend/src/db/query.js`의 조회 결과 변환 한 곳에서만 한다.** 그 위 계층에는 snake_case 키가 없으며, 입력은 위치 파라미터(`$1…`)로 바인딩하므로 변환이 필요 없다. 프론트는 변환하지 않는다. | CP-07 |
-| NP-13 | API 경로는 `/api/` + 복수 명사 kebab-case 리소스(`/api/todos`, `/api/todos/:id`), 동작은 HTTP 메서드로 표현한다. 인증처럼 CRUD로 표현되지 않는 동작만 `auth` 아래 동사 경로를 허용한다. 쿼리 파라미터·JSON 키는 camelCase. 상태를 바꾸는 요청은 GET을 쓰지 않는다. 버전 접두는 두지 않는다. 엔드포인트 명세는 후속 문서에서 정한다. | NFR-10, PRD 8장 |
-| NP-14 | 상태 코드: 성공 200/201/204, 입력 오류 400, 미인증 401, 없음·타인 소유 404, 중복·규칙 위반 409, 로그인 차단 429, 서버 오류 500. | NFR-06, NFR-11 |
+| NP-13 | API 경로는 `/api/` + 복수 명사 kebab-case 리소스(`/api/todos`, `/api/todos/:id`), 동작은 HTTP 메서드로 표현한다. 인증처럼 CRUD로 표현되지 않는 동작만 `auth` 아래 동사 경로를 허용한다(`/api/auth/login`, `/api/auth/refresh`, `/api/auth/logout`). 쿼리 파라미터·JSON 키는 camelCase. 상태를 바꾸는 요청은 GET을 쓰지 않는다. 버전 접두는 두지 않는다. 엔드포인트 명세는 후속 문서에서 정한다. | NFR-10, PRD 8장 |
+| NP-14 | 상태 코드: 성공 200/201/204, 입력 오류 400, 미인증 401, 없음·타인 소유 404, 중복·규칙 위반 409, 로그인 차단 429, 서버 오류 500, 헬스체크 DB 실패 503(SP-12). | NFR-06, NFR-11 |
 | NP-15 | **에러 응답은 한 형식이다.** `{ "error": { "code", "message", "fields"? } }`. `code`는 UPPER_SNAKE 안정 식별자(`VALIDATION_ERROR`, `UNAUTHENTICATED`, `INVALID_CREDENTIALS`, `NOT_FOUND`, `TOO_MANY_ATTEMPTS`, `INTERNAL_ERROR` 등)이고 프론트는 `code`로 분기한다. `message`는 사용자에게 보여도 되는 문구이며, `fields`(필드명 → 문구)는 입력 오류에만 붙는다. 500은 내부 정보·스택을 담지 않는다. | FR-13, WA-22 |
 | NP-16 | 타인 소유 ID와 존재하지 않는 ID는 코드·메시지·본문이 같은 `NOT_FOUND`로 응답한다. 로그인 실패는 비밀번호 오류와 없는 이메일을 같은 `INVALID_CREDENTIALS`로 응답한다. | NFR-06, FR-02, WA-03 |
 
@@ -164,7 +175,7 @@
 | NP-19 | API·JSON | 날짜는 `"YYYY-MM-DD"` 문자열. 입력은 형식뿐 아니라 달력상 유효한 날짜(`2026-02-30` 거부)까지 검증한다 | FR-13 |
 | NP-20 | 계산 | 날짜끼리의 비교는 제로 패딩 문자열 비교(`<`, `<=`)로 한다. `new Date('YYYY-MM-DD')`(UTC로 해석됨)와 `toISOString()`은 날짜에 쓰지 않는다. 날짜 덧셈·주 시작(일요일)·월 범위는 프론트 `lib/date.ts`가 정수 연·월·일로 계산해 문자열을 반환한다 | AS-09, CP-03 |
 | NP-21 | '오늘' | 클라이언트가 `new Date()`의 **로컬** 연·월·일을 조합해 만든 `YYYY-MM-DD`를 `today`로 전달한다(`lib/date.ts`의 `todayLocal()` 한 곳). 서버는 상태 판정·필터에 서버 시계를 쓰지 않는다 | AS-02, PA-06 |
-| NP-22 | 시각(timestamp) | `created_at`·`updated_at`은 `timestamptz`, JSON은 ISO 8601(UTC). 정렬(FR-06)·감사 용도로만 쓰고 날짜 판정에는 쓰지 않는다. 서버 시계는 시각 기록, JWT 만료, 로그인 차단에만 쓴다 | FR-06 |
+| NP-22 | 시각(timestamp) | `created_at`·`updated_at`은 `timestamptz`, JSON은 ISO 8601(UTC). 정렬(FR-06)·감사 용도로만 쓰고 날짜 판정에는 쓰지 않는다. 서버 시계는 시각 기록, JWT·Refresh Token 만료, 로그인 차단에만 쓴다 | FR-06 |
 
 ## 4. 테스트·품질 원칙
 
@@ -187,9 +198,9 @@
 | TP-10 | 소유자 검증 404 | 할일·카테고리 각 리소스의 조회·수정·완료·삭제를 타인 ID로 요청 → 존재하지 않는 ID와 **상태 코드·본문 동일**. 본문에 타인 카테고리 ID를 넣는 경우도 거부. 타인 데이터는 변경되지 않음 | BR-02, NFR-06, SN-13 |
 | TP-11 | 비즈니스 규칙 | BR-03(이메일 중복), BR-05(같은 날 허용·역전 거부), BR-06·07(기본 카테고리), BR-08·09, BR-10(할일 이동·총수 불변), BR-11(삭제 후 404), BR-12(현재 비밀번호 확인) | 도메인 5장 |
 | TP-12 | 입력 검증 | AS-08 경계값을 **API 직접 요청**으로: 제목 100/101, 메모 1000/1001, 카테고리 이름 20/21, 이름 50/51·빈 값, 비밀번호 7/8, 이메일 형식, 필수 누락, 달력상 무효 날짜, `today` 누락·형식 오류 | FR-13, AS-08 |
-| TP-13 | 인증·보안 | 로그인 5회 실패 차단·6번째 정답 거부·5분 후 성공·실패 후 성공 시 초기화(SA-03), 비밀번호 오류/없는 이메일의 동일 응답, 쿠키 속성(`HttpOnly`, `SameSite=Lax`, 운영 `Secure`), 로그아웃 쿠키 만료, 미인증 401, 응답에 `password_hash` 없음 | NFR-10, NFR-11, SN-02 |
+| TP-13 | 인증·보안 | 로그인 5회 실패 차단·6번째 정답 거부·5분 후 성공·실패 후 성공 시 초기화(SA-03), 비밀번호 오류/없는 이메일의 동일 응답, 쿠키 2종의 속성(`HttpOnly`, `SameSite=Lax`, 운영 `Secure`, `refresh_token`의 `Path=/api/auth`), JWT 서명·검증은 `HS384` 고정(`HS256`·`none` 등 다른 alg 토큰 거부), Refresh rotation(갱신 시 이전 행 삭제·새 행 INSERT, 만료 이어받기), 사용된 Refresh Token 재사용 시 401, 만료·미존재 Refresh 401과 쿠키 2종 만료, 로그아웃 시 Refresh 행 삭제·갱신 불가·쿠키 만료·항상 204, 미인증 401, 응답에 `password_hash` 없음 | NFR-10, NFR-11, SN-02 |
 | TP-14 | 날짜 무이동 | 임의 날짜(월말·연말 포함)를 저장 후 조회해 문자열이 같음 | NP-18 |
-| TP-15 | 프론트 핵심 | 401 처리(만료 안내 유무 구분, 로그인 실패는 이동 안 함), 필터 변경 시 1페이지 복귀, `today`가 요청에 실림, 서버 거부 오류가 필드 아래에 표시, 삭제 확인 취소 시 무변화, 캘린더 막대 범위 계산(CV 표) | WA-09, WA-21, WA-22 |
+| TP-15 | 프론트 핵심 | 401 처리(Access 만료 시 갱신 후 원요청 재시도, 동시 401에도 갱신 1회, 갱신 실패 시에만 만료 안내·이동, 로그인 실패는 이동 안 함), 필터 변경 시 1페이지 복귀, `today`가 요청에 실림, 서버 거부 오류가 필드 아래에 표시, 삭제 확인 취소 시 무변화, 캘린더 막대 범위 계산(CV 표) | WA-09, WA-21, WA-22 |
 
 ## 5. 설정·보안·운영 원칙
 
@@ -197,7 +208,7 @@
 |----|------|------|
 | SP-01 | 환경 변수는 `backend/src/config/env.js` 한 곳에서만 읽고 zod로 검증하며, 누락·형식 오류면 서버 시작을 중단한다(`process.env` 직접 접근 금지). 프론트는 `import.meta.env`를 한 모듈에서만 읽는다. | NFR-12 |
 | SP-02 | 비밀값(`.env`)은 커밋하지 않는다. 패키지마다 `.env.example`(값은 예시·빈 값)을 두고, 변수를 추가·삭제하면 같은 커밋에서 갱신한다. 프론트 `VITE_*` 값은 브라우저에 노출되므로 비밀을 넣지 않는다. | NFR-05, `.gitignore` |
-| SP-03 | **JWT 쿠키:** 만료 7일, 리프레시 없음, `HttpOnly`, `SameSite=Lax`, 운영 `Secure`. 토큰은 JS가 접근할 수 없으며 `localStorage`·`sessionStorage`에 저장하지 않는다. 로그아웃은 발급 때와 같은 속성으로 쿠키를 만료시킨다. 서버 측 토큰 무효화는 하지 않는다(PA-01 한계). `JWT_SECRET`은 32자 이상을 시작 시 검증한다. | PA-01, NFR-10, FR-11 |
+| SP-03 | **JWT·쿠키:** Access Token은 JWT(`HS384`, 만료 15분, 페이로드 `sub`·`iat`·`exp`)이고 쿠키 `access_token`(`HttpOnly`, `SameSite=Lax`, `Path=/`, 운영 `Secure`, `Max-Age` 15분)으로 보낸다. 서명 때 알고리즘을 명시하고, 검증 때 허용 알고리즘을 `['HS384']`로 고정해 다른 알고리즘과 `none`을 거부한다. Refresh Token은 `crypto.randomBytes(32)`의 base64url 불투명 문자열이며 DB에는 SHA-256 해시만 저장하고(원문 저장·로그 금지), 쿠키 `refresh_token`(`HttpOnly`, `SameSite=Lax`, `Path=/api/auth`, 운영 `Secure`, `Max-Age` 7일)으로 보낸다. 토큰은 JS가 접근할 수 없으며 `localStorage`·`sessionStorage`에 저장하지 않는다. 로그아웃·갱신 실패는 발급 때와 같은 속성으로 두 쿠키를 만료시킨다. 로그아웃은 Refresh 행을 삭제한다. 이미 발급된 Access Token은 최대 15분 유효하다(PA-01 한계). `JWT_SECRET`은 64자 이상(48바이트 무작위 값의 base64)을 시작 시 검증한다. | PA-01, NFR-10, FR-11 |
 | SP-04 | 비밀번호는 `bcrypt`로만 저장·비교한다. 평문을 저장·로그·응답에 쓰지 않는다. 없는 이메일 로그인에도 더미 해시 비교를 수행해 응답 시간 차로 존재 여부가 드러나지 않게 한다. | PA-02, NFR-05, FR-02 |
 | SP-05 | SQL 값은 파라미터 바인딩(`$n`)만 쓴다. 문자열 연결·템플릿 삽입 금지. 정렬 컬럼 등 동적 식별자가 필요하면 코드 내 화이트리스트 매핑만 허용한다. | NFR-07 |
 | SP-06 | 사용자 데이터를 읽거나 바꾸는 모든 쿼리의 WHERE에 `user_id = $n`(소유자 조건)을 포함한다. `id`만으로 조회·수정·삭제하는 쿼리를 만들지 않는다. | BR-02, NFR-06 |
@@ -216,10 +227,12 @@
 | backend | `NODE_ENV`, `PORT`, `LOG_LEVEL` | 실행 환경·포트·로그 수준 | 아니오 |
 | backend | `DATABASE_URL`, `TEST_DATABASE_URL` | 운영/개발 DB, 통합 테스트 DB(`_test`로 끝남, TP-04) | 예 |
 | backend | `DB_POOL_MAX` | 풀 최대 연결 수 | 아니오 |
-| backend | `JWT_SECRET` | JWT 서명 키 | 예 |
+| backend | `JWT_SECRET` | Access Token(HS384) 서명 키. 64자 이상 | 예 |
 | backend | `BCRYPT_COST` | 해시 비용(R-03 조정용) | 아니오 |
 | backend | `FRONTEND_ORIGIN` | CORS 허용 출처 | 아니오 |
 | frontend | `VITE_API_BASE_URL` | API 기준 경로(기본 `/api`) | 아니오 |
+
+토큰 만료(Access 15분, Refresh 7일)는 env가 아니라 `lib/jwt.js`의 상수다(PP-22).
 
 ## 6. 디렉토리 구조
 
@@ -231,7 +244,7 @@ todolist-app/
 ├─ .editorconfig            # 공통 포맷 설정
 ├─ .gitignore               # .env, .env.* 무시, !.env.example 허용 (기존)
 ├─ .prettierrc              # 공통 Prettier 설정
-├─ docs/                    # 1~5번 문서
+├─ docs/                    # 1~8번 문서, schema.sql
 ├─ prompts/                 # 문서 생성 프롬프트 (기존)
 ├─ backend/                 # 6.3
 ├─ frontend/                # 6.2
@@ -324,11 +337,11 @@ backend/
 │  ├─ validators/           # common.schemas.js(날짜·ID), <리소스>.schemas.js
 │  ├─ controllers/          # <리소스>.controller.js
 │  ├─ services/             # <리소스>.service.js (auth.service.js에 로그인 차단 포함)
-│  ├─ repositories/         # <리소스>.repository.js (SQL)
+│  ├─ repositories/         # <리소스>.repository.js (SQL), refreshTokens.repository.js
 │  ├─ domain/               # todoStatus.js, dateString.js, limits.js
-│  ├─ middlewares/          # auth.js, validate.js, errorHandler.js
+│  ├─ middlewares/          # auth.js(Access Token 검증; refresh·logout 경로에는 미적용), validate.js, errorHandler.js
 │  ├─ db/                   # pool.js(풀+타입 파서), query.js(camelCase 변환, withTransaction)
-│  └─ lib/                  # logger.js, errors.js(AppError), jwt.js, password.js, loginAttempts.js
+│  └─ lib/                  # logger.js, errors.js(AppError), jwt.js(HS384 서명·검증, TTL 상수, 쿠키 옵션, Refresh 생성·해시), password.js, loginAttempts.js
 └─ tests/
    ├─ setup.js              # 테스트 DB 가드·마이그레이션·TRUNCATE
    ├─ helpers/              # 로그인 헬퍼, 팩토리
@@ -342,7 +355,7 @@ backend/
 | `src/routes`~`repositories` | 2.1의 레이어 |
 | `src/domain/` | 순수 규칙. 외부 import 없음 |
 | `src/db/` | 풀·타입 파서·변환·트랜잭션 헬퍼 |
-| `src/lib/` | 로거, 에러, JWT·쿠키 옵션, 비밀번호 해시, 로그인 시도 기록 |
+| `src/lib/` | 로거, 에러, JWT·Refresh Token·쿠키 옵션, 비밀번호 해시, 로그인 시도 기록 |
 | `tests/` | 통합 테스트와 공통 준비 |
 
 **테스트 파일 위치 규칙**
@@ -356,7 +369,7 @@ backend/
 
 ## 7. 가정·미결 사항
 
-문서(도메인 v0.3, PRD v0.4, 시나리오 v0.3, 와이어프레임 v0.2)에 없던 결정이다. 기존 가정(AS/PA/SA/WA)과 구분해 PP로 기록한다.
+문서(도메인 v0.3, PRD v0.5, 시나리오 v0.4, 와이어프레임 v0.3)에 없던 결정이다. 기존 가정(AS/PA/SA/WA)과 구분해 PP로 기록한다.
 
 | ID | 구분 | 내용 |
 |----|------|------|
@@ -375,10 +388,11 @@ backend/
 | PP-13 | 미결 | date picker는 별도 라이브러리 없이 네이티브 `<input type="date">`를 `DateField`로 감싸 쓴다(값이 `YYYY-MM-DD` 문자열이라 CP-03과 맞음). 와이어프레임 5.3·WA-13의 '직접 입력 불가' 팝업 UI와 브라우저별 모양이 다를 수 있어 확정이 필요하다. 형식·역전 검증은 입력 방식과 무관하게 유지한다. |
 | PP-14 | 가정 | 캘린더 월·주·일 뷰는 라이브러리 없이 직접 구현한다. R-01의 구현 순서(일 → 월 → 주)를 따르고, 기간 막대 배치는 `features/calendar`의 순수 함수로 두어 CV 표로 테스트한다. 캘린더 조회는 별도 리소스가 아니라 할일 기간 조회로 본다(API 명세에서 확정). |
 | PP-15 | 미결 | **스타일 가이드 문서가 아직 없다.** 프론트 스킬은 UI 컴포넌트에 스타일 가이드 적용을 요구하므로 가이드 작성 전에 공통 컴포넌트(`components/ui`) 구현에 들어가지 않는다. 그 전까지 CSS는 CSS Modules + `styles/tokens.css`의 CSS 변수(자리 표시)를 쓰고, 가이드 확정 후 토큰만 교체한다. |
-| PP-16 | 미결 | 두 스킬은 작업 계획 문서를 `docs/5-plan.md`로 참조하지만 본 문서가 5번(`5-project-principle.md`)을 쓴다. 계획 문서의 번호와 파일명을 확정해 스킬 또는 문서 이름을 맞춰야 한다. |
+| PP-16 | 미결 | 두 스킬은 작업 계획 문서를 `docs/5-plan.md`로 참조하지만 본 문서가 5번(`5-project-principle.md`)을 쓴다. 계획 문서는 `docs/8-plan.md`로 확정되었으므로 남은 일은 스킬의 참조 경로를 맞추는 것이다(8번 문서 D-01). |
 | PP-17 | 가정 | 브라우저 E2E 자동화(Playwright 등)는 도입하지 않고 E2E-01·02는 수동 점검한다(G-01). |
 | PP-18 | 가정 | 본문(body)에 담긴 타인 소유 카테고리 ID는 존재하지 않는 ID와 같은 404로 처리한다(SN-07 1e의 '거부'를 NFR-06과 일치시킴). |
 | PP-19 | 가정 | 커밋 훅(husky 등), CI, 메트릭 엔드포인트는 두지 않는다. 품질 확인은 `lint`·`test:coverage` 수동 실행이다(NFR-12는 5xx 로그만 요구). 필요해지면 후속 결정한다. |
 | PP-20 | 가정 | AS-08 길이 상수는 백엔드 `domain/limits.js`와 프론트 `lib/limits.ts`에 각각 둔다. AS-08은 '세부값은 구현 단계에서 확정'이므로 변경 시 양쪽을 함께 수정하고, 불일치하면 서버 판정이 우선한다. |
 | PP-21 | 가정 | 목록 응답은 페이지 번호 방식(WA-09)을 위해 전체 건수를 포함하는 것을 기본으로 한다. 불가하면 이전/다음만 둔다(API 명세에서 확정). |
-| PP-22 | 가정 | JWT 페이로드는 사용자 ID만 담고, 비밀번호 변경 후에도 기존 세션을 유지한다(WA-06). 쿠키 이름은 `token`이다. |
+| PP-22 | 가정 | Access Token 페이로드는 `sub`(사용자 ID)·`iat`·`exp`만 담고, 비밀번호 변경 후에도 현재 세션을 유지한다(WA-06). 쿠키 이름은 `access_token`·`refresh_token`이다. 만료(Access 15분, Refresh 7일)는 env가 아니라 `lib/jwt.js` 상수다. |
+| PP-23 | 미결 | 비밀번호 변경 시 다른 기기의 Refresh Token 폐기 여부(PRD OQ-03). 재사용 탐지(토큰 계열 폐기)는 하지 않는다(PA-01). |

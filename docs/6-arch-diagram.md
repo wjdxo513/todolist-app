@@ -6,6 +6,8 @@
 |------|------|--------|------|------|
 | v0.1 | 2026-11-04 | jtaewu | 초안 | 최초 작성 |
 | v0.2 | 2026-11-04 | jtaewu | 초안 | ERD를 `7-erd.md`로 분리, AD-06·09·10 해결 반영 |
+| v0.3 | 2026-11-04 | jtaewu | 초안 | 인증 변경 반영: Access/Refresh 쿠키 2종, 토큰 갱신(rotation) 시퀀스 6.9 추가, AD-13 해결 |
+| v0.4 | 2026-11-04 | jtaewu | 초안 | 5번 v0.3·ERD v0.3 기준 버전 갱신, 3.1장 5번 문서 절 번호 참조 명확화 |
 
 ## 변경 이력
 
@@ -14,10 +16,19 @@
 | v0.1 | 2026-11-04 | 전체 | 신규 | 기술 아키텍처 다이어그램 초안 작성 | jtaewu |
 | v0.2 | 2026-11-04 | 1·5장 | 삭제 | 5장 ERD와 컬럼·제약 표를 `7-erd.md`로 분리하고 아키텍처 관점 요점과 참조만 남김 | jtaewu |
 | v0.2 | 2026-11-04 | 6.4·6.5·6.6, 8장 | 수정 | 정렬 3순위 `id`(ER-05), 소유자 일치 복합 FK(ER-03), FK `ON DELETE RESTRICT`(ER-04) 반영. AD-06·09·10을 해결로 변경 | jtaewu |
+| v0.3 | 2026-11-04 | 머리말 | 수정 | 기준 문서 버전 갱신(PRD v0.5, 시나리오 v0.4, 와이어프레임 v0.3, 5번 v0.2, ERD v0.2) | jtaewu |
+| v0.3 | 2026-11-04 | 2장 | 수정 | 배포 구성도·표의 쿠키 표기를 `access_token`·`refresh_token` 2종으로 변경 | jtaewu |
+| v0.3 | 2026-11-04 | 3.1·4.1장 | 수정 | client 갱신·재시도 문구, 미들웨어 체인에 갱신·로그아웃 경로(auth 미적용)와 쿠키명 반영 | jtaewu |
+| v0.3 | 2026-11-04 | 5장 | 수정 | 아키텍처 요점에 `refresh_tokens`와 갱신 트랜잭션 추가 | jtaewu |
+| v0.3 | 2026-11-04 | 6.0·6.2·6.3·6.8 | 수정 | 로그인에서 두 토큰 발급·`refresh_tokens` INSERT·만료 행 정리, 401 처리에 갱신·재시도 분기, 로그아웃 시 행 DELETE, 비밀번호 변경 후 세션 유지 문구 | jtaewu |
+| v0.3 | 2026-11-04 | 6.9 | 추가 | 토큰 갱신(rotation) 시퀀스 추가(기존 절 번호 변경 없음) | jtaewu |
+| v0.3 | 2026-11-04 | 7·8장 | 수정 | 트랜잭션 목록에 갱신 추가. AD-13 해결, AD-16·17 추가 | jtaewu |
+| v0.4 | 2026-11-04 | 머리말, 5장 | 수정 | 기준 문서 버전 갱신(5번 v0.3, ERD v0.3) | jtaewu |
+| v0.4 | 2026-11-04 | 3.1장 | 수정 | '6.2'가 본 문서 6.2(로그인)로 읽히지 않도록 '5번 문서 6.2'(프론트 디렉토리 구조)로 명시 | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.4), `3-user-scenario.md`(v0.3), `4-wireframe.md`(v0.2), `5-project-principle.md`(v0.1)를 기준으로 한다. 데이터 모델은 `7-erd.md`(v0.1)를 따른다. 아키텍처는 5번 문서와 일치해야 하며, 충돌하면 5번이 우선한다.
+> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.5), `3-user-scenario.md`(v0.4), `4-wireframe.md`(v0.3), `5-project-principle.md`(v0.3)를 기준으로 한다. 데이터 모델은 `7-erd.md`(v0.3)를 따른다. 아키텍처는 5번 문서와 일치해야 하며, 충돌하면 5번이 우선한다.
 
 ## 1. 개요
 
@@ -31,7 +42,7 @@
 | 3 | 프론트엔드 레이어, 상태 관리 역할 | flowchart |
 | 4 | 백엔드 미들웨어 체인, 레이어 의존 | flowchart |
 | 5 | 데이터 모델 요점 (ERD는 `7-erd.md`) | 표 |
-| 6 | 비즈니스 로직 시퀀스 6.1~6.8 | sequenceDiagram |
+| 6 | 비즈니스 로직 시퀀스 6.1~6.9 | sequenceDiagram |
 
 **시퀀스 표기:** 참여자 약어는 사용자(U), 화면(UI), 상태 저장소(ST, Zustand), TanStack Query와 api(Q), Express 미들웨어(MW), controller(C), service(S), domain(D), repository(R), PostgreSQL(DB)이다. `MW`는 `cors`, `cookie-parser`, `auth`, `validate`, `errorHandler`를 묶어 표현한다. 오류 응답은 모두 NP-15 형식이며 `errorHandler`가 변환한다(LP-04). 요청 경로는 API 명세 전이라 동작 이름으로 적고, 5번 문서 NP-13에 예시로 나온 `/api/todos` 계열만 경로를 쓴다(AD-01).
 
@@ -42,7 +53,7 @@
 ```mermaid
 flowchart LR
     subgraph CLIENT["클라이언트"]
-        B["브라우저<br/>React SPA<br/>쿠키 token: HttpOnly, SameSite=Lax"]
+        B["브라우저<br/>React SPA<br/>쿠키 access_token, refresh_token<br/>HttpOnly, SameSite=Lax"]
     end
 
     subgraph SERVER["서버 1대 - 같은 출처"]
@@ -71,7 +82,7 @@ flowchart LR
 | 같은 출처 | 진입점이 정적 자원과 `/api`를 같은 출처로 제공한다. CORS는 `FRONTEND_ORIGIN` 하나만 허용하는 안전장치다 | PP-12, SP-07, NFR-10 |
 | 정적 자원 제공 주체 | 리버스 프록시인지 Express인지, TLS 종단 위치는 문서에 없다 | AD-02 |
 | 개발 환경 | Vite 개발 서버가 `/api`를 백엔드로 프록시한다 | PP-03 |
-| 인증 쿠키 | JWT 7일, 리프레시 없음, 운영 `Secure`. JS에서 접근 불가 | PA-01, SP-03, NFR-10 |
+| 인증 쿠키 | `access_token`(JWT HS384, 15분, `Path=/`)과 `refresh_token`(불투명, 7일, `Path=/api/auth`). 운영 `Secure`. JS에서 접근 불가 | PA-01, SP-03, NFR-10 |
 | 로그인 차단 | 프로세스 메모리. 재시작 시 초기화, 단일 인스턴스 전제 | PP-09, SP-08 |
 | DB 접속 | `pg.Pool` 하나, `date`(OID 1082)는 문자열로 파싱 | SP-10, NP-18 |
 | 운영 | `GET /api/health`(DB `SELECT 1`, 실패 시 503), `SIGTERM` 시 정리 후 종료. 캐시 서버·큐·CI 없음 | SP-12, PP-19, PRD 8장 |
@@ -137,10 +148,10 @@ flowchart TD
     STORES --> LIB
 ```
 
-- 모든 호출은 `api/client.ts`의 단일 래퍼를 거친다(`credentials: 'include'`, 실패 시 `ApiError`). 컴포넌트가 `fetch`를 직접 쓰지 않는다(LP-08).
-- 기능 간 import는 상대 기능의 `index.ts` 공개 항목만 허용한다. 예: SC-06의 카테고리 선택은 `features/categories`의 공개 훅을 쓴다(LP 2.2, 6.2).
+- 모든 호출은 `api/client.ts`의 단일 래퍼를 거친다(`credentials: 'include'`, 실패 시 `ApiError`). 컴포넌트가 `fetch`를 직접 쓰지 않는다. 래퍼는 `/api/auth/*`가 아닌 요청의 401 `UNAUTHENTICATED`에 갱신을 한 번(single-flight) 호출하고 원래 요청을 한 번 재시도한다(LP-08, 6.3, 6.9).
+- 기능 간 import는 상대 기능의 `index.ts` 공개 항목만 허용한다. 예: SC-06의 카테고리 선택은 `features/categories`의 공개 훅을 쓴다(LP 2.2, 5번 문서 6.2).
 - 프론트는 상태를 계산하지 않고 API가 준 `status`를 `StatusBadge`로 표시만 한다(LP-13).
-- 근거: LP-01, LP 2.2, LP-08, LP-09, LP-13, 6.2 디렉토리 구조.
+- 근거: LP-01, LP 2.2, LP-08, LP-09, LP-13, 5번 문서 6.2 디렉토리 구조.
 
 ### 3.2 TanStack Query와 Zustand의 역할 구분
 
@@ -190,9 +201,9 @@ flowchart TD
     REQ(["HTTP 요청"]) --> BASE["공통: x-powered-by 비활성, cors FRONTEND_ORIGIN credentials,<br/>express.json limit, cookie-parser"]
     BASE --> ROUTER["routes/index.js"]
     ROUTER --> HEALTH["health.routes: 인증 없음<br/>DB SELECT 1"]
-    ROUTER --> PUBLIC["auth.routes 가입 로그인<br/>validate zod"]
+    ROUTER --> PUBLIC["auth.routes 가입 로그인 갱신 로그아웃<br/>auth 미적용, 갱신과 로그아웃은 쿠키 refresh_token 사용"]
     ROUTER --> PROTECTED["users, categories, todos routes<br/>auth, validate zod"]
-    PROTECTED --> AUTH["auth 미들웨어<br/>쿠키 token, jwt.verify, req에 userId"]
+    PROTECTED --> AUTH["auth 미들웨어<br/>쿠키 access_token, jwt.verify algorithms HS384, req에 userId"]
     AUTH -->|"실패"| E401["AppError 401 UNAUTHENTICATED"]
     AUTH -->|"성공"| VALIDATE["validate 미들웨어<br/>zod 파싱, 알 수 없는 필드 제거"]
     PUBLIC --> VALIDATE
@@ -208,7 +219,7 @@ flowchart TD
 
 | 구성요소 | 역할 | 근거 |
 |----------|------|------|
-| `auth` | 쿠키 `token`의 JWT 검증. 페이로드는 사용자 ID만 | SP-03, PP-22 |
+| `auth` | 쿠키 `access_token`의 JWT 검증(허용 알고리즘 `HS384`만). 페이로드는 `sub`·`iat`·`exp`. 갱신·로그아웃 경로에는 적용하지 않는다 | SP-03, PP-22 |
 | `validate` | 라우트 경계 zod 검증. 통과 값만 controller에 전달 | LP-05, FR-13 |
 | `errorHandler` | `AppError(status, code, message)`를 한 형식으로 응답. 500은 내부 정보 미노출, 5xx는 경로·시각과 함께 로그 | LP-04, NP-15, SP-09, NFR-12 |
 | `pino` | 구조화 로그, `password`·`Cookie`·토큰 필드 `redact` | SP-09 |
@@ -243,12 +254,13 @@ flowchart TD
 
 ## 5. 데이터 모델
 
-ERD는 `7-erd.md`(v0.1)로 분리했다. 개념 ERD, 테이블 명세, 제약·인덱스, BR별 DB 보장 매핑은 그 문서를 따른다.
+ERD는 `7-erd.md`(v0.3)로 분리했다. 개념 ERD, 테이블 명세, 제약·인덱스, BR별 DB 보장 매핑은 그 문서를 따른다.
 
 | 아키텍처 관점 요점 | 내용 | 근거 |
 |------|------|------|
 | 상태 비저장 | `status` 컬럼이 없다. 응답 시 `deriveStatus`로 파생한다 | BR-13, CP-02 |
-| 트랜잭션 대상 | 가입(사용자 + 기본 카테고리, 6.1), 카테고리 삭제(할일 이동 + 삭제, 6.6) | LP-03 |
+| 트랜잭션 대상 | 가입(사용자 + 기본 카테고리, 6.1), 카테고리 삭제(할일 이동 + 삭제, 6.6), 토큰 갱신(`refresh_tokens` DELETE + INSERT, 6.9) | LP-03 |
+| 세션 저장 | `refresh_tokens`에 Refresh Token의 SHA-256 해시만 저장한다(로그인마다 1행). Access Token은 저장하지 않는다 | `7-erd.md` 4.4, ER-13 |
 | DB 제약이 서비스 검사 뒤의 최종 방어선 | 이메일 고유(409 변환), `end_date >= start_date`, 할일·카테고리 소유자 일치 복합 FK, FK `ON DELETE RESTRICT` | `7-erd.md` 5.1, ER-03, ER-04 |
 | 조회 인덱스 | 목록 정렬과 캘린더 기간 겹침은 `(user_id, end_date, created_at, id)` 인덱스 하나로 받친다 | `7-erd.md` 5.2, NFR-04 |
 
@@ -259,13 +271,14 @@ ERD는 `7-erd.md`(v0.1)로 분리했다. 개념 ERD, 테이블 명세, 제약·�
 | 절 | 지점 | 선정 이유 | 근거 |
 |----|------|-----------|------|
 | 6.1 | 회원가입 | 다중 테이블 트랜잭션(사용자 + 기본 카테고리), 이메일 중복 409, bcrypt를 트랜잭션 밖에서 수행 | BR-03, BR-06, LP-03 |
-| 6.2 | 로그인 | 차단 판정 → 해시 비교 → 실패 집계의 순서, 계정 존재 비노출(더미 해시), 쿠키 발급. 규칙이 가장 많다 | SN-02, SA-03, SP-04, SP-08 |
-| 6.3 | 인증 미들웨어와 401 처리, 로그아웃 | 같은 401이라도 코드별로 프론트 동작(안내·이동)이 갈린다. 세 곳(미들웨어, 전역 onError, 로그인 화면)이 협력 | LP-09, WA-21, FR-02, FR-11 |
+| 6.2 | 로그인 | 차단 판정 → 해시 비교 → 실패 집계의 순서, 계정 존재 비노출(더미 해시), 두 토큰 발급과 `refresh_tokens` INSERT·만료 행 정리. 규칙이 가장 많다 | SN-02, SA-03, SP-04, SP-08, PA-01 |
+| 6.3 | 인증 미들웨어와 401 처리, 로그아웃 | 같은 401이라도 코드별로 프론트 동작(갱신·재시도, 안내·이동)이 갈린다. 네 곳(미들웨어, client 갱신, 전역 onError, 로그인 화면)이 협력. 로그아웃은 서버에서 Refresh 행을 삭제 | LP-08, LP-09, WA-21, FR-02, FR-11 |
 | 6.4 | 할일 목록 조회 | `today` 전달, 상태 판정의 두 형태(SQL 조건과 `deriveStatus`), AND 필터, 정렬, 50건 페이지네이션 | FR-06, PA-06, LP-07 |
 | 6.5 | 할일 등록·수정 | 검증 계층 분담(zod, 소유자 확인, DB 제약), 카테고리 소유권, 기본 카테고리 대체, 404 통일 | BR-04, BR-05, BR-07, PP-18 |
 | 6.6 | 카테고리 삭제 | BR-08 거부와 BR-10 이동 + 삭제를 하나의 트랜잭션으로 묶는 유일한 다중 갱신 | BR-08, BR-10, LP-03 |
 | 6.7 | 캘린더 조회 | 뷰 범위 계산(일~토), 기간 겹침 조건, 상태 파생 | FR-10, AS-09, CV-01~05 |
 | 6.8 | 비밀번호 변경 | 현재 비밀번호 확인 후 변경, 세션 유지, 401과의 혼동 방지 | BR-12, WA-06, PP-22 |
+| 6.9 | 토큰 갱신(rotation) | 행 삭제와 새 행 INSERT를 하나의 트랜잭션으로 묶고 만료를 이어받는다. 동시 401의 single-flight, 실패 시 쿠키 2종 만료와 원래 401 전달 | PA-01, SP-03, LP-08, LP-09, SN-15 |
 
 **제외한 지점:** 할일 삭제와 완료 토글은 6.5와 같은 소유자 조건·404 패턴의 단일 문장이라 별도 시퀀스를 두지 않았다. 카테고리 등록·수정(BR-09 중복 409)과 이름 저장은 단일 문장이다. 회원 탈퇴는 제외 항목이다(OQ-01).
 
@@ -376,9 +389,14 @@ sequenceDiagram
                 UI-->>U: 폼 상단 단일 문구, 비밀번호 입력 비움
             else 비교 성공
                 S->>LA: 해당 이메일 횟수 초기화
-                S->>S: JWT 서명 7일, 페이로드는 사용자 ID만
-                S-->>C: 사용자 정보와 토큰
-                C-->>Q: 200과 Set-Cookie token HttpOnly SameSite=Lax 운영 Secure 7일
+                S->>S: Access Token JWT HS384 서명 15분, 페이로드 sub iat exp
+                S->>S: Refresh Token 생성 randomBytes 32 base64url, SHA-256 해시 계산
+                S->>R: 그 사용자의 만료된 refresh_tokens 행 정리
+                R->>DB: DELETE FROM refresh_tokens WHERE user_id = $1 AND expires_at <= now
+                S->>R: Refresh Token 행 저장, 만료는 지금부터 7일
+                R->>DB: INSERT INTO refresh_tokens user_id token_hash expires_at
+                S-->>C: 사용자 정보와 두 토큰 원문
+                C-->>Q: 200과 Set-Cookie access_token 15분 Path=/ 및 refresh_token 7일 Path=/api/auth, 둘 다 HttpOnly SameSite=Lax 운영 Secure
                 Q->>Q: me 캐시에 사용자 저장
                 Q-->>UI: 성공
                 UI-->>U: SC-05로 이동 SA-02
@@ -387,9 +405,9 @@ sequenceDiagram
     end
 ```
 
-- 근거: FR-02, NFR-11, SN-02, SA-02, SA-03, SP-03, SP-04, SP-08, WA-03, PP-11. 5회째 실패 응답은 401이고 6번째 시도부터 429다(SN-02 기대 결과). 인메모리 구현이라 DB 트랜잭션은 없다(PP-09). 차단 세부 동작은 AD-05.
+- 근거: FR-02, NFR-11, SN-02, SA-02, SA-03, SP-03, SP-04, SP-08, WA-03, PP-11, PA-01. 5회째 실패 응답은 401이고 6번째 시도부터 429다(SN-02 기대 결과). 차단 판정은 인메모리라 DB를 쓰지 않는다(PP-09). 로그인마다 `refresh_tokens` 1행이 생기며 여러 기기 로그인이 가능하다(SA-10). 만료 행 정리는 로그인 때만 한다. 원문 토큰은 저장하지 않고 해시만 저장한다(ER-13). 차단 세부 동작은 AD-05, 정리·INSERT의 트랜잭션 여부는 AD-16.
 
-### 6.3 인증 미들웨어와 401 처리, 로그아웃 (SN-03, SN-04)
+### 6.3 인증 미들웨어와 401 처리, 로그아웃 (SN-03, SN-04, SN-15)
 
 ```mermaid
 sequenceDiagram
@@ -400,13 +418,16 @@ sequenceDiagram
     participant Q as TanStack Query와 api
     participant MW as Express 미들웨어
     participant C as controller
+    participant S as service
+    participant R as repository
+    participant DB as PostgreSQL
 
     rect rgb(240, 240, 240)
-    Note over U,C: A. 보호 API 호출 - 모든 SC-03 ~ SC-07 요청 공통
+    Note over U,DB: A. 보호 API 호출 - 모든 SC-03 ~ SC-07 요청 공통
     UI->>Q: 조회 또는 mutation 실행
     Q->>MW: API 요청, credentials include로 쿠키 전송
-    MW->>MW: auth 쿠키 token 읽기, jwt.verify
-    alt 쿠키 없음, 서명 오류, 만료 7일 경과
+    MW->>MW: auth 쿠키 access_token 읽기, jwt.verify 허용 알고리즘 HS384만
+    alt 쿠키 없음, 서명 오류, 다른 알고리즘 또는 none, 만료 15분 경과
         MW-->>Q: 401 UNAUTHENTICATED, 데이터 없음
     else 유효
         MW->>C: req에 userId 설정 후 다음 단계
@@ -415,8 +436,22 @@ sequenceDiagram
     end
 
     rect rgb(240, 240, 240)
-    Note over U,C: B. 클라이언트 401 처리 - app/queryClient.ts 전역 onError 한 곳 LP-09
-    Q->>Q: ApiError 코드 확인
+    Note over U,DB: B. client 갱신과 재시도 - api/client.ts LP-08
+    alt 401 UNAUTHENTICATED 이고 요청 경로가 api auth 아래가 아님
+        Q->>Q: 토큰 갱신 6.9, 동시 401이어도 갱신 요청은 하나 single-flight
+        alt 갱신 성공
+            Q->>MW: 원래 요청을 한 번만 재시도
+            MW-->>Q: 정상 응답
+            Q-->>UI: 화면 유지, 로그인 화면으로 이동하지 않음 SN-15
+        else 갱신 실패
+            Q->>Q: 원래 401 ApiError를 throw
+        end
+    end
+    end
+
+    rect rgb(240, 240, 240)
+    Note over U,DB: C. 클라이언트 401 처리 - app/queryClient.ts 전역 onError 한 곳 LP-09
+    Q->>Q: ApiError 코드 확인, 갱신까지 실패한 401만 여기에 도달
     alt 코드가 UNAUTHENTICATED
         alt 이미 인증된 상태였음 - me 캐시에 사용자가 있음
             Q->>ST: 세션 만료 플래그 설정
@@ -433,17 +468,23 @@ sequenceDiagram
     end
 
     rect rgb(240, 240, 240)
-    Note over U,C: C. 로그아웃 - 공통 헤더 FR-11
+    Note over U,DB: D. 로그아웃 - 공통 헤더 FR-11, auth 미들웨어 없음
     U->>UI: 로그아웃 선택
     UI->>Q: 로그아웃 mutation 실행
-    Q->>MW: 로그아웃 요청
+    Q->>MW: 로그아웃 요청, 쿠키 refresh_token은 Path=/api/auth라 이 요청에 전송
     alt 요청 실패 네트워크 등
         MW-->>Q: 실패
         Q-->>UI: ApiError
         UI-->>U: 헤더 아래 오류 영역 표시, 로그인 상태 유지 SA-05
     else 성공
         MW->>C: 로그아웃 처리
-        C-->>Q: 쿠키 token 발급 때와 같은 속성으로 만료 응답
+        opt 쿠키 refresh_token 이 있음
+            C->>S: 해당 Refresh Token 폐기
+            S->>S: SHA-256 해시 계산
+            S->>R: 해시로 행 삭제
+            R->>DB: DELETE FROM refresh_tokens WHERE token_hash = $1
+        end
+        C-->>Q: 204, 쿠키 access_token과 refresh_token 둘 다 발급 때와 같은 속성으로 만료
         Q->>Q: 서버 데이터 캐시 비움
         Q->>UI: SC-02로 이동
         UI-->>U: 안내 없음, 이전 사용자 데이터 미노출 E2E-02
@@ -451,7 +492,7 @@ sequenceDiagram
     end
 ```
 
-- 근거: FR-02, FR-11, LP-08~10, SP-03, SN-03, SN-04, WA-21, SA-04, SA-05, E2E-02, PP-22. 로그인 요청의 `INVALID_CREDENTIALS` 401은 이동 대상이 아니다. 재시도는 4xx에 하지 않는다(LP-10). 서버 측 토큰 무효화는 하지 않는다(PA-01 한계). 로그아웃 API의 인증 필요 여부와 캐시 비움 시점은 AD-13.
+- 근거: FR-02, FR-11, LP-08~10, SP-03, SN-03, SN-04, SN-15, WA-21, SA-04, SA-05, E2E-02, PP-22. 로그인 요청의 `INVALID_CREDENTIALS` 401은 이동 대상이 아니다. TanStack Query 재시도는 4xx에 하지 않는다(LP-10). `/api/auth/*` 요청의 401은 갱신 대상이 아니다. 로그아웃은 서버에서 Refresh Token 행을 삭제해 세션을 폐기하지만, 이미 발급된 Access Token은 최대 15분 유효하다(PA-01 한계). 로그아웃은 인증 미들웨어 없이 `refresh_token` 쿠키만 사용하므로 Access Token이 만료된 뒤에도 폐기된다(AD-13 해결). 캐시 비움 시점은 6.3 C·D에 그린 대로 둔다.
 
 ### 6.4 할일 목록 조회와 필터 (SN-11)
 
@@ -769,7 +810,7 @@ sequenceDiagram
                 S->>R: 비밀번호 갱신
                 R->>DB: UPDATE users SET password_hash = $1 WHERE id = $2
                 S-->>C: 완료
-                C-->>Q: 성공 응답, 쿠키 재발급 없음
+                C-->>Q: 성공 응답, 쿠키 재발급 없음, refresh_tokens 변경 없음
                 Q-->>UI: 성공
                 UI-->>U: 입력란 초기화, 인라인 안내, 로그인 상태 유지 WA-06
             end
@@ -777,7 +818,62 @@ sequenceDiagram
     end
 ```
 
-- 근거: FR-03, UC-04, BR-12, AS-05, WA-06, PP-22, SP-04, LP-06, SN-05. 기존 토큰은 서버에서 무효화하지 않으므로 변경 후에도 세션이 유지된다(PA-01 한계). 이메일은 수정 대상이 아니라 요청에 받지 않는다.
+- 근거: FR-03, UC-04, BR-12, AS-05, WA-06, PP-22, SP-04, LP-06, SN-05. 변경 후에도 현재 세션(두 토큰)이 유지된다. 다른 기기의 Refresh Token 폐기 여부는 미결이다(PRD OQ-03, PP-23). 이메일은 수정 대상이 아니라 요청에 받지 않는다.
+
+### 6.9 토큰 갱신(rotation) (SN-15)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Q as TanStack Query와 api
+    participant MW as Express 미들웨어
+    participant C as controller
+    participant S as service
+    participant R as repository
+    participant DB as PostgreSQL
+
+    Note over Q: 트리거 - api auth 아래가 아닌 요청이 401 UNAUTHENTICATED, 동시 401은 갱신 하나를 공유 single-flight
+    Q->>MW: 갱신 요청, 쿠키 refresh_token 만 사용
+    Note over MW: auth 미들웨어 없음, cookie-parser 로 refresh_token 읽기
+    alt 쿠키 refresh_token 없음
+        MW-->>Q: 401 UNAUTHENTICATED, 쿠키 2종 만료
+    else 있음
+        MW->>C: 쿠키 값
+        C->>S: 갱신 처리
+        S->>S: SHA-256 해시 계산
+        Note over S,DB: 트랜잭션 시작, 풀 클라이언트 1개 사용
+        S->>DB: BEGIN
+        S->>R: 기존 행 삭제
+        R->>DB: DELETE FROM refresh_tokens WHERE token_hash = $1 AND expires_at > now RETURNING user_id, expires_at
+        alt 행 없음 - 미발급, 만료, 폐기됨, 이미 사용됨
+            DB-->>R: 0행
+            S->>DB: ROLLBACK
+            S-->>MW: AppError 401 UNAUTHENTICATED
+            MW-->>Q: 401과 Set-Cookie 쿠키 2종 만료
+            Q->>Q: 갱신 실패, 원래 요청의 401을 throw, 이후 6.3 C
+        else 행 삭제됨
+            DB-->>R: user_id 와 기존 expires_at
+            S->>S: 새 Refresh Token 생성 randomBytes 32 base64url, 해시 계산
+            S->>R: 새 행 저장, 만료는 기존 expires_at을 그대로 이어받음
+            R->>DB: INSERT INTO refresh_tokens user_id token_hash expires_at
+            alt DB 오류 발생
+                S->>DB: ROLLBACK
+                S-->>MW: 예외 전파, 기존 행도 그대로 남음
+                MW-->>Q: 500 INTERNAL_ERROR
+                Q->>Q: 갱신 실패, 원래 401을 throw
+            else 성공
+                S->>DB: COMMIT
+                S->>S: 새 Access Token JWT HS384 서명 15분
+                S-->>C: 두 토큰 원문
+                C-->>Q: 성공 응답과 Set-Cookie access_token 및 refresh_token, 로그인 때와 같은 속성
+                Q->>MW: 원래 요청을 한 번만 재시도
+                MW-->>Q: 정상 응답
+            end
+        end
+    end
+```
+
+- 근거: PA-01, SP-03, LP-03, LP-08, LP-09, SN-03, SN-15, ER-13~15. Refresh Token의 절대 만료(로그인 후 최대 7일)를 유지하려고 새 행은 기존 `expires_at`을 이어받는다(확정 설계의 `RETURNING user_id`에 이어받기용 `expires_at`을 함께 반환하는 것으로 그렸다). 상태 코드와 응답 본문은 API 명세에서 정한다(AD-01). 이미 사용된 토큰은 행이 없어 401이며 계열 전체 폐기(재사용 탐지)는 하지 않는다(PA-01 한계, ER-15). 여러 탭의 동시 갱신은 AD-17.
 
 ## 7. 아키텍처 점검 요약
 
@@ -786,8 +882,8 @@ sequenceDiagram
 | 문서에 없는 구성요소 추가 | 없음. 캐시 서버, 큐, 마이크로서비스, CI, 메트릭 서버, ORM은 그리지 않았다 | CP-01, PP-19, PRD 8장 |
 | 상태 저장 컬럼 | 없음. `is_completed`만 저장 | BR-13, CP-02 |
 | 모든 데이터 쿼리의 `user_id` 조건 | 시퀀스의 SQL 모두 포함(인증용 `users` 조회와 로그인 이메일 조회 제외) | SP-06 |
-| 서버 시계 사용 범위 | 시각 기록, JWT 만료, 로그인 차단만. 상태 판정은 요청의 `today` | NP-22, NP-21 |
-| 트랜잭션 | 가입(6.1), 카테고리 삭제(6.6)만 사용. 나머지는 단일 문장 | LP-03 |
+| 서버 시계 사용 범위 | 시각 기록, JWT·Refresh Token 만료, 로그인 차단만. 상태 판정은 요청의 `today` | NP-22, NP-21 |
+| 트랜잭션 | 가입(6.1), 카테고리 삭제(6.6), 토큰 갱신(6.9)만 사용. 나머지는 단일 문장(로그인의 만료 행 정리와 INSERT는 AD-16) | LP-03 |
 
 ## 8. 가정·미결 사항
 
@@ -807,6 +903,8 @@ sequenceDiagram
 | AD-10 | 해결 | 할일과 카테고리의 소유자 동일(도메인 3장)을 DB 제약(복합 FK 등)으로도 막을지, 서비스 검사(PP-18)만으로 둘지 NP-10에 없다. → `7-erd.md` ER-03에서 복합 FK로 결정. 서비스 검사(404 통일)는 유지. |
 | AD-11 | 미결 | 경로의 ID가 정수 형식이 아닐 때(예: `abc`) 400인지 404인지 없다. NFR-06의 '없는 ID와 동일한 404' 원칙과 FR-13 입력 검증이 충돌할 수 있다. |
 | AD-12 | 미결 | 5번 문서에 없는 항목: 미등록 경로 404, JSON 파싱 오류·본문 크기 초과(`express.json` limit)에 NP-15 형식을 적용하는지. `auth`와 `validate`의 순서도 명시가 없어 본 문서는 `auth` 먼저(미인증은 데이터 노출 없이 401, SN-03)로 그렸다. 미들웨어 등록 순서도 `app.js`에서 확정이 필요하다. |
-| AD-13 | 미결 | 로그아웃 API가 인증 미들웨어 뒤에 있는지(쿠키 만료 후 로그아웃 요청이 401이 되는 경우의 동작), 로그아웃·401 시 서버 데이터 캐시를 비우는 규칙이 문서에 없다. E2E-02(이전 사용자 데이터 미노출)를 만족시키기 위해 6.3에 캐시 비움을 그렸다. |
+| AD-13 | 해결 | 로그아웃 API가 인증 미들웨어 뒤에 있는지(쿠키 만료 후 로그아웃 요청이 401이 되는 경우의 동작)가 없었다. → 인증 미들웨어 없이 `refresh_token` 쿠키로 처리하고 항상 204로 응답하는 것으로 결정(6.3 D). 로그아웃·401 시 서버 데이터 캐시를 비우는 규칙은 문서에 없어 E2E-02를 만족시키도록 6.3에 그렸다(5번 문서 LP에는 없음). |
 | AD-14 | 불일치 | 5번 문서 2.1의 의존 방향 문장(`routes → controllers → ...`)에 `validators`가 없고 표에서만 '`routes`에서만 참조'로 나온다. 또 `validators`가 `domain`(날짜 문자열 검증)을 import하는 것이 문장에 명시되지 않았다. 본 문서는 `routes → validators`, `validators → domain`으로 그렸다. |
 | AD-15 | 가정 | 이메일 중복 판정을 사전 조회가 아니라 고유 제약 위반(23505)을 409로 변환하는 방식으로 그렸다. 동시 가입에서도 안전하며 NP-10 제약과 일치한다. 구현 시 사전 조회를 추가해도 결과는 같다. |
+| AD-16 | 미결 | 로그인 시 만료 행 DELETE와 새 행 INSERT(6.2)를 하나의 트랜잭션으로 묶는지, 정리 DELETE 실패 시 로그인을 실패시키는지가 정해지지 않았다. 6.2는 두 문장을 순서대로 그렸다. |
+| AD-17 | 미결 | single-flight는 한 탭 안에서만 갱신을 하나로 합친다. 같은 브라우저의 여러 탭이 동시에 갱신하면 먼저 처리된 요청이 행을 삭제하므로 나중 요청은 401(사용된 토큰)이 되어 그 탭만 세션 만료 안내로 이동할 수 있다. 재사용 탐지가 없어(PA-01) 계열 폐기로 번지지는 않는다. 허용 여부·유예 시간은 정해지지 않았다. |

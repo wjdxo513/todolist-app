@@ -1,6 +1,6 @@
 -- =====================================================================
 -- TodoList 데이터베이스 스키마 (PostgreSQL 17)
--- 근거: docs/7-erd.md v0.1 (테이블 명세 4장, 제약·인덱스 5장, ER-01~12)
+-- 근거: docs/7-erd.md v0.3 (테이블 명세 4장, 제약·인덱스 5장, ER-01~16)
 -- 네이밍: docs/5-project-principle.md NP-08~11 (SQL 키워드 대문자)
 --
 -- 실행 예:
@@ -79,6 +79,26 @@ CREATE INDEX idx_todos_user_id_end_date_created_at_id
 -- 카테고리 필터, BR-10 할일 이동, 카테고리 삭제 시 FK 참조 검사
 CREATE INDEX idx_todos_user_id_category_id
     ON todos (user_id, category_id);
+
+-- ---------------------------------------------------------------------
+-- refresh_tokens: 로그인 세션(Refresh Token). 로그인마다 1행(PA-01).
+-- 원문은 저장하지 않고 SHA-256 해시(hex 64자)만 저장한다(ER-13).
+-- ---------------------------------------------------------------------
+CREATE TABLE refresh_tokens (
+    id         INTEGER     GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id    INTEGER     NOT NULL,
+    token_hash CHAR(64)    NOT NULL,                      -- SHA-256 hex, ER-13
+    expires_at TIMESTAMPTZ NOT NULL,                      -- 로그인 후 7일, 갱신 시 이어받음(ER-14)
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT uq_refresh_tokens_token_hash UNIQUE (token_hash),         -- 갱신·로그아웃 조회 키
+    CONSTRAINT fk_refresh_tokens_user_id
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT   -- ER-06
+);
+
+-- 로그인 시 그 사용자의 만료 행 정리, FK 참조 검사(ER-16)
+CREATE INDEX idx_refresh_tokens_user_id
+    ON refresh_tokens (user_id);
 
 -- ---------------------------------------------------------------------
 -- schema_migrations: 마이그레이션 적용 이력 (SP-11, ER-10)

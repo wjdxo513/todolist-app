@@ -5,36 +5,46 @@
 | 버전 | 일자 | 작성자 | 상태 | 요약 |
 |------|------|--------|------|------|
 | v0.1 | 2026-11-04 | jtaewu | 초안 | 최초 작성 (6번 문서 5장 ERD를 분리·상세화) |
+| v0.2 | 2026-11-04 | jtaewu | 초안 | 인증 변경 반영: `refresh_tokens` 테이블 추가 |
+| v0.3 | 2026-11-04 | jtaewu | 초안 | 기준 문서 버전 갱신(5번 v0.3, 6번 v0.4) |
 
 ## 변경 이력
 
 | 버전 | 일자 | 변경 섹션 | 구분 | 변경 내용 | 작성자 |
 |------|------|-----------|------|-----------|--------|
 | v0.1 | 2026-11-04 | 전체 | 신규 | ERD 초안 작성 | jtaewu |
+| v0.2 | 2026-11-04 | 머리말 | 수정 | 기준 문서 버전 갱신(PRD v0.5, 5번 v0.2, 6번 v0.3) | jtaewu |
+| v0.2 | 2026-11-04 | 1·2·3장 | 수정 | 범위 테이블 수 변경, 개념 ERD에 사용자 1:N Refresh Token 추가, 물리 ERD에 `refresh_tokens` 추가 | jtaewu |
+| v0.2 | 2026-11-04 | 4·5장 | 추가 | 4.4 `refresh_tokens` 명세 추가(기존 4.4 `schema_migrations`는 4.5로 이동), 5.1 제약·5.2 인덱스 추가 | jtaewu |
+| v0.2 | 2026-11-04 | 6장 | 수정 | BR-01 보장 수단에 Refresh 행 삭제 언급 | jtaewu |
+| v0.2 | 2026-11-04 | 7장 | 추가 | ER-13(해시 저장), ER-14(절대 만료 이어받기), ER-15(재사용 탐지 없음), ER-16(정리 정책) | jtaewu |
+| v0.3 | 2026-11-04 | 머리말 | 수정 | 기준 문서 버전 갱신(5번 v0.3, 6번 v0.4). 테이블·제약·인덱스 변경 없음 | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.4), `5-project-principle.md`(v0.1), `6-arch-diagram.md`(v0.2)를 기준으로 한다. 규칙(BR)·요구사항(FR/NFR)은 재정의하지 않고 ID로 참조한다. 네이밍·타입은 5번 문서 NP-08~10, NP-18, PP-07을 따른다.
+> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.5), `5-project-principle.md`(v0.3), `6-arch-diagram.md`(v0.4)를 기준으로 한다. 규칙(BR)·요구사항(FR/NFR)은 재정의하지 않고 ID로 참조한다. 네이밍·타입은 5번 문서 NP-08~10, NP-18, PP-07을 따른다.
 
 ## 1. 개요
 
-**범위:** PostgreSQL 17 테이블 3개(`users`, `categories`, `todos`)와 마이그레이션 이력 테이블 1개(`schema_migrations`, SP-11). `pg`로 SQL을 직접 작성하고 순번 SQL 마이그레이션으로 적용한다(ORM 없음). DDL 파일 자체는 `backend/migrations/`에서 작성한다.
+**범위:** PostgreSQL 17 테이블 4개(`users`, `categories`, `todos`, `refresh_tokens`)와 마이그레이션 이력 테이블 1개(`schema_migrations`, SP-11). `pg`로 SQL을 직접 작성하고 순번 SQL 마이그레이션으로 적용한다(ORM 없음). DDL 파일 자체는 `backend/migrations/`에서 작성한다.
 
 **고정 원칙:**
 - 상태(status)는 저장하지 않는다. 저장 값은 `is_completed`뿐이다(BR-13).
 - 날짜는 `date`, 시각은 `timestamptz`. `pg`는 `date`를 문자열 `YYYY-MM-DD`로 받는다(NP-18).
 - 로그인 시도 제한은 인메모리라 테이블이 없다(PP-09).
+- Refresh Token은 SHA-256 해시만 `refresh_tokens`에 저장한다. 원문과 Access Token은 저장하지 않는다(ER-13).
 - 범위 밖(탈퇴 OQ-01, 비밀번호 재설정 OQ-02, 반복·알림·공유 EX-01)을 위한 테이블·컬럼은 없다. soft delete, 감사 로그, 정렬 순서 컬럼도 두지 않는다(BR-11 영구 삭제).
 
 ## 2. 개념 ERD
 
-도메인 3장과 같은 엔티티 3개·관계 3개다.
+도메인 3장의 엔티티 3개·관계 3개에 인증 세션(Refresh Token)이 추가되었다(PA-01).
 
 ```mermaid
 erDiagram
     USER ||--|{ CATEGORY : "소유(기본 1개 이상)"
     USER ||--o{ TODO : "소유"
     CATEGORY ||--o{ TODO : "분류"
+    USER ||--o{ REFRESH_TOKEN : "로그인 세션"
 ```
 
 | 관계 | 카디널리티 | 근거 |
@@ -42,6 +52,7 @@ erDiagram
 | 사용자 - 카테고리 | 1 : N (최소 1개 = 기본 카테고리) | BR-06, AS-04 |
 | 사용자 - 할일 | 1 : N | BR-02 |
 | 카테고리 - 할일 | 1 : N (할일은 반드시 하나의 카테고리에 속함) | BR-07 |
+| 사용자 - Refresh Token | 1 : N (로그인마다 1개, 여러 기기 로그인 가능) | PA-01, SA-10 |
 | 소유자 일치 | 할일의 소유자 = 그 카테고리의 소유자 | 도메인 3장, ER-03 |
 
 ## 3. 논리/물리 ERD
@@ -51,6 +62,7 @@ erDiagram
     users ||--|{ categories : "소유"
     users ||--o{ todos : "소유"
     categories ||--o{ todos : "분류, 복합 FK"
+    users ||--o{ refresh_tokens : "세션"
 
     users {
         integer id PK "identity"
@@ -78,6 +90,14 @@ erDiagram
         boolean is_completed "기본 false, 유일한 상태 값"
         timestamptz created_at "정렬 2순위"
         timestamptz updated_at "수정일시"
+    }
+
+    refresh_tokens {
+        integer id PK "identity"
+        integer user_id FK "소유자, NOT NULL"
+        char token_hash UK "64자, SHA-256 hex, 원문 미저장"
+        timestamptz expires_at "발급 시점부터 7일, 갱신 시 이어받음"
+        timestamptz created_at "발급일시"
     }
 ```
 
@@ -131,7 +151,19 @@ erDiagram
 
 `status` 컬럼은 없다. 상태는 `today`(PA-06)와 `start_date`·`end_date`·`is_completed`로 조회 시 파생한다(LP-07).
 
-### 4.4 `schema_migrations`
+### 4.4 `refresh_tokens`
+
+| 컬럼 | 타입 | NULL | 기본값 | 제약 | 근거 |
+|------|------|------|--------|------|------|
+| id | integer | NOT NULL | identity | PK | PP-07 |
+| user_id | integer | NOT NULL | - | `fk_refresh_tokens_user_id` | PA-01, ER-06 |
+| token_hash | char(64) | NOT NULL | - | `uq_refresh_tokens_token_hash` | PA-01, SP-03, ER-13 |
+| expires_at | timestamptz | NOT NULL | - | - | PA-01, ER-14 |
+| created_at | timestamptz | NOT NULL | `now()` | - | NP-09, NP-22 |
+
+로그인마다 1행이다. 갱신(rotation)은 기존 행을 삭제하고 새 행을 INSERT하며 `expires_at`을 이어받는다(ER-14).
+
+### 4.5 `schema_migrations`
 
 | 컬럼 | 타입 | NULL | 기본값 | 제약 | 근거 |
 |------|------|------|--------|------|------|
@@ -153,6 +185,8 @@ NP-10 네이밍(`<접두>_<테이블>_<컬럼>`)을 따른다. PK 이름은 Post
 | `uq_categories_id_user_id` | categories | UNIQUE (id, user_id) | 복합 FK의 참조 대상 | ER-03 |
 | `ck_todos_end_date_gte_start_date` | todos | CHECK (end_date >= start_date) | 같은 날 허용, 역전 거부. 서버 검증 뒤의 최종 방어선 | BR-05, NP-10 |
 | `fk_categories_user_id` | categories | FK (user_id) → users(id), ON DELETE RESTRICT | 소유자 존재 보장 | ER-06 |
+| `uq_refresh_tokens_token_hash` | refresh_tokens | UNIQUE (token_hash) | 해시로 조회·삭제하는 갱신·로그아웃 경로의 조회 키 | PA-01, ER-13 |
+| `fk_refresh_tokens_user_id` | refresh_tokens | FK (user_id) → users(id), ON DELETE RESTRICT | 소유자 존재 보장 | ER-06 |
 | `fk_todos_user_id` | todos | FK (user_id) → users(id), ON DELETE RESTRICT | 소유자 존재 보장 | ER-06 |
 | `fk_todos_category_id_user_id` | todos | FK (category_id, user_id) → categories(id, user_id), ON DELETE RESTRICT | 카테고리 존재 + 할일·카테고리 소유자 일치를 DB가 보장 | ER-03, ER-04, AD-09, AD-10 |
 
@@ -164,6 +198,7 @@ NP-10 네이밍(`<접두>_<테이블>_<컬럼>`)을 따른다. PK 이름은 Post
 |------|--------|------|-------------|------|
 | `idx_todos_user_id_end_date_created_at_id` | todos | (user_id, end_date, created_at, id) | ① 목록: `WHERE user_id = $1 [AND category_id/상태 조건] ORDER BY end_date, created_at, id LIMIT 50`. ② 캘린더 기간 겹침: `WHERE user_id = $1 AND start_date <= 범위끝 AND end_date >= 범위시작`은 `end_date >= 범위시작`으로 스캔 범위를 좁히고 `start_date`는 필터로 적용 | FR-06, FR-10, NFR-04, PA-05, ER-05, ER-07 |
 | `idx_todos_user_id_category_id` | todos | (user_id, category_id) | 카테고리 필터, BR-10 이동 `UPDATE ... WHERE user_id AND category_id`, 카테고리 삭제 시 FK 참조 검사(없으면 전체 스캔) | FR-06, BR-10, NFR-04, PA-07 |
+| `idx_refresh_tokens_user_id` | refresh_tokens | (user_id) | 로그인 시 그 사용자의 만료 행 정리 `DELETE ... WHERE user_id = $1 AND expires_at <= now()`, FK 참조 검사 | PA-01, ER-16 |
 
 `uq_users_email`, `uq_categories_user_id_name`(user_id 선두)도 각각 로그인 조회, 사용자별 카테고리 목록 조회를 받친다. 상태 필터(완료·기한 초과·시작 전·진행중)는 사용자 단위 행 수(PA-07: 200건)가 작아 별도 인덱스를 두지 않는다(ER-07).
 
@@ -173,7 +208,7 @@ DB = DB 제약이 보장, 서비스 = 서비스 로직(및 zod)이 보장. '병�
 
 | BR | 규칙 | 구분 | 보장 수단 |
 |----|------|------|-----------|
-| BR-01 | 인증된 사용자만 사용 | 서비스 | `auth` 미들웨어. DB 무관 |
+| BR-01 | 인증된 사용자만 사용 | 서비스 | `auth` 미들웨어. DB 무관. 세션 폐기는 `refresh_tokens` 행 삭제로 한다(로그아웃, PA-01) |
 | BR-02 | 본인 데이터만 접근, 타인은 404 | 서비스(+DB 일부) | 모든 쿼리 WHERE `user_id`(SP-06). DB는 복합 FK로 타인 카테고리 참조 저장만 차단(ER-03) |
 | BR-03 | 이메일 전체 고유 | 병행 | `uq_users_email`, `ck_users_email_lower`. 서비스는 정규화·409 변환 |
 | BR-04 | 제목·시작일·종료일 필수, 길이 | 병행 | NOT NULL + `varchar(n)` 최대 길이. 최소 길이·형식은 서비스(zod) |
@@ -205,3 +240,7 @@ DB = DB 제약이 보장, 서비스 = 서비스 로직(및 zod)이 보장. '병�
 | ER-10 | 가정 | `schema_migrations`는 `filename`(PK), `applied_at` 두 컬럼이다. 5번 문서 SP-11은 '적용 이력'까지만 정하므로 컬럼 구성은 본 문서의 가정이며 러너 구현 시 확정한다. |
 | ER-11 | 가정 | 메모가 없으면 빈 문자열이 아니라 NULL로 저장한다(서비스가 빈 값을 NULL로 변환). |
 | ER-12 | 미결 | '사용자당 기본 카테고리 최소 1개'(BR-06)는 DB로 보장하지 못한다(부분 고유 인덱스는 최대 1개만 보장). 지연 제약 트리거는 도입하지 않고 가입 트랜잭션에 의존한다. 가입 외 경로로 기본 카테고리가 없는 사용자가 생길 수 있는지는 구현 시 점검한다. |
+| ER-13 | 가정 | Refresh Token은 SHA-256 해시(hex 64자, `char(64)`)만 저장하고 원문은 저장하지 않는다. 이유: DB가 유출되어도 토큰을 재사용할 수 없고, 토큰이 `randomBytes(32)`의 고엔트로피 값이라 솔트·느린 해시가 필요 없다. 해시 값은 `uq_refresh_tokens_token_hash`로 고유하다. |
+| ER-14 | 가정 | `expires_at`은 로그인 시점부터 7일이며 갱신(rotation) 시 새 행이 기존 행의 `expires_at`을 그대로 이어받는다. 이유: 로그인 후 최대 7일이라는 절대 만료를 유지한다(슬라이딩 연장 없음). 갱신 시 기존 행 `DELETE ... RETURNING`과 새 행 INSERT는 한 트랜잭션이다(6번 문서 6.9). |
+| ER-15 | 가정 | 재사용 탐지(토큰 계열 전체 폐기)를 하지 않는다. 이미 사용된 Refresh Token은 행이 없어 401이 될 뿐이며, 이를 위한 계열 식별 컬럼·상태 컬럼은 두지 않는다(PA-01 한계). |
+| ER-16 | 가정 | 만료된 `refresh_tokens` 행의 정리는 그 사용자가 로그인할 때 DELETE하는 것뿐이다. 다시 로그인하지 않는 사용자의 만료 행은 남는다. 별도 정리 작업은 두지 않는다. |
