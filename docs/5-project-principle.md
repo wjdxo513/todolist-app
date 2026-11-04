@@ -8,6 +8,8 @@
 | v0.2 | 2026-11-04 | jtaewu | 초안 | 인증 변경 반영: HS384 Access Token + Refresh Token(rotation), client 자동 갱신 |
 | v0.3 | 2026-11-04 | jtaewu | 초안 | 문서 간 불일치 정리: NP-14 503, 루트 트리 docs 설명, PP-16 상태 |
 | v0.4 | 2026-11-04 | jtaewu | 초안 | SP-03 Refresh 쿠키 Max-Age 메모, PP-16 해결 |
+| v0.5 | 2026-11-04 | jtaewu | 초안 | DB 연결 환경 변수 이름을 `DB_CONN_STRING`으로 변경 |
+| v0.6 | 2026-11-04 | jtaewu | 초안 | PRE-01·PRE-02 반영: PP-11·14·15·21 해결 |
 
 ## 변경 이력
 
@@ -26,6 +28,9 @@
 | v0.4 | 2026-11-04 | 머리말, 7장 | 수정 | 기준 문서 버전 갱신(PRD v0.6, 시나리오 v0.5, 와이어프레임 v0.4) | jtaewu |
 | v0.4 | 2026-11-04 | 5장 | 수정 | SP-03에 갱신 시 Refresh 쿠키 `Max-Age` 7일 재설정과 서버 절대 만료 차이 메모(현행 유지) | jtaewu |
 | v0.4 | 2026-11-04 | 7장 | 수정 | PP-16 해결: 스킬 참조 경로를 `docs/8-plan.md`로 수정 | jtaewu |
+| v0.5 | 2026-11-04 | 5장 | 수정 | 환경 변수 표의 `DATABASE_URL`을 `DB_CONN_STRING`으로 변경 | jtaewu |
+| v0.6 | 2026-11-04 | 6장 | 수정 | frontend `styles/` 설명을 스타일 가이드 기준으로 변경 | jtaewu |
+| v0.6 | 2026-11-04 | 7장 | 수정 | PP-11·PP-14·PP-21 해결(API 명세 `backend/swagger.yaml` v0.2), PP-15 해결(`9-style-guide.md`) | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
@@ -229,7 +234,7 @@
 | 위치 | 변수 | 용도 | 비밀 |
 |------|------|------|------|
 | backend | `NODE_ENV`, `PORT`, `LOG_LEVEL` | 실행 환경·포트·로그 수준 | 아니오 |
-| backend | `DATABASE_URL`, `TEST_DATABASE_URL` | 운영/개발 DB, 통합 테스트 DB(`_test`로 끝남, TP-04) | 예 |
+| backend | `DB_CONN_STRING`, `TEST_DATABASE_URL` | 운영/개발 DB, 통합 테스트 DB(`_test`로 끝남, TP-04) | 예 |
 | backend | `DB_POOL_MAX` | 풀 최대 연결 수 | 아니오 |
 | backend | `JWT_SECRET` | Access Token(HS384) 서명 키. 64자 이상 | 예 |
 | backend | `BCRYPT_COST` | 해시 비용(R-03 조정용) | 아니오 |
@@ -301,7 +306,7 @@ frontend/
 | `api/` | `fetch` 래퍼, 리소스별 호출, 응답 타입 |
 | `stores/` | Zustand UI 상태(LP-12) |
 | `lib/` | 순수 유틸·상수 |
-| `styles/` | 전역 스타일과 디자인 토큰(스타일 가이드 확정 전까지 자리만, PP-15) |
+| `styles/` | 전역 스타일과 디자인 토큰(`9-style-guide.md` 3장 기준, PP-15) |
 | `test/` | 테스트 공통 준비(MSW, 렌더 헬퍼) |
 
 **화면·공통 컴포넌트 매핑**
@@ -387,16 +392,16 @@ backend/
 | PP-08 | 가정 | 이메일은 공백 제거·소문자로 정규화해 저장하고 고유 제약을 둔다(BR-03). 로그인 차단 집계 키도 같다. |
 | PP-09 | 가정 | 로그인 시도 제한은 프로세스 메모리에 둔다. 서버 재시작 시 초기화되고 다중 인스턴스에서는 동작하지 않으며, 단일 서버 전제(PRD 8장)에서 허용한다. 확장 시 DB 테이블로 교체한다. |
 | PP-10 | 가정 | `bcrypt`(네이티브)를 쓰며 기본 cost는 10, `BCRYPT_COST`로 조정한다(R-03). NFR-03이 미달이면 cost와 libuv 스레드 풀 크기(`UV_THREADPOOL_SIZE`)를 조정한다. 설치가 어려우면 `bcryptjs`로 대체하되 성능을 재측정한다. |
-| PP-11 | 가정 | 로그인 차단 응답은 429(`TOO_MANY_ATTEMPTS`), 인증 실패는 401(`INVALID_CREDENTIALS`), 미인증은 401(`UNAUTHENTICATED`)로 구분한다. 구체 코드 목록은 API 명세에서 확정한다. |
+| PP-11 | 해결 | 로그인 차단 응답은 429(`TOO_MANY_ATTEMPTS`), 인증 실패는 401(`INVALID_CREDENTIALS`), 미인증은 401(`UNAUTHENTICATED`)로 구분한다. 구체 코드 목록은 API 명세에서 확정한다. → `backend/swagger.yaml`의 `ErrorCode`로 확정(8번 문서 PRE-02). |
 | PP-12 | 가정 | 인증 쿠키가 `SameSite=Lax`이므로 운영에서는 프론트 정적 파일과 `/api`를 같은 출처(리버스 프록시 또는 같은 도메인)로 제공한다. CORS 설정(NFR-10)은 출처가 갈리는 경우를 위한 안전장치다. |
 | PP-13 | 미결 | date picker는 별도 라이브러리 없이 네이티브 `<input type="date">`를 `DateField`로 감싸 쓴다(값이 `YYYY-MM-DD` 문자열이라 CP-03과 맞음). 와이어프레임 5.3·WA-13의 '직접 입력 불가' 팝업 UI와 브라우저별 모양이 다를 수 있어 확정이 필요하다. 형식·역전 검증은 입력 방식과 무관하게 유지한다. |
-| PP-14 | 가정 | 캘린더 월·주·일 뷰는 라이브러리 없이 직접 구현한다. R-01의 구현 순서(일 → 월 → 주)를 따르고, 기간 막대 배치는 `features/calendar`의 순수 함수로 두어 CV 표로 테스트한다. 캘린더 조회는 별도 리소스가 아니라 할일 기간 조회로 본다(API 명세에서 확정). |
-| PP-15 | 미결 | **스타일 가이드 문서가 아직 없다.** 프론트 스킬은 UI 컴포넌트에 스타일 가이드 적용을 요구하므로 가이드 작성 전에 공통 컴포넌트(`components/ui`) 구현에 들어가지 않는다. 그 전까지 CSS는 CSS Modules + `styles/tokens.css`의 CSS 변수(자리 표시)를 쓰고, 가이드 확정 후 토큰만 교체한다. |
+| PP-14 | 해결 | 캘린더 월·주·일 뷰는 라이브러리 없이 직접 구현한다. R-01의 구현 순서(일 → 월 → 주)를 따르고, 기간 막대 배치는 `features/calendar`의 순수 함수로 두어 CV 표로 테스트한다. 캘린더 조회는 별도 리소스가 아니라 할일 기간 조회로 본다(API 명세에서 확정). → `backend/swagger.yaml`에서 `GET /api/todos/calendar`로 확정. |
+| PP-15 | 해결 | 스타일 가이드는 `9-style-guide.md`로 확정했다. 공통 컴포넌트(`components/ui`)는 이 문서의 CSS 변수(`styles/tokens.css`, 3장)를 CSS Modules에서 `var(--...)`로 참조해 구현하며 색상 리터럴을 쓰지 않는다. 상태 색상은 라벨·모양·선 모양의 보조 수단이다(WA-19). |
 | PP-16 | 해결 | 계획 문서는 `docs/8-plan.md`로 확정했고, 두 스킬(`develop-backend`, `develop-frontend`)의 참조 경로도 `docs/8-plan.md`로 수정했다(8번 문서 D-01). |
 | PP-17 | 가정 | 브라우저 E2E 자동화(Playwright 등)는 도입하지 않고 E2E-01·02는 수동 점검한다(G-01). |
 | PP-18 | 가정 | 본문(body)에 담긴 타인 소유 카테고리 ID는 존재하지 않는 ID와 같은 404로 처리한다(SN-07 1e의 '거부'를 NFR-06과 일치시킴). |
 | PP-19 | 가정 | 커밋 훅(husky 등), CI, 메트릭 엔드포인트는 두지 않는다. 품질 확인은 `lint`·`test:coverage` 수동 실행이다(NFR-12는 5xx 로그만 요구). 필요해지면 후속 결정한다. |
 | PP-20 | 가정 | AS-08 길이 상수는 백엔드 `domain/limits.js`와 프론트 `lib/limits.ts`에 각각 둔다. AS-08은 '세부값은 구현 단계에서 확정'이므로 변경 시 양쪽을 함께 수정하고, 불일치하면 서버 판정이 우선한다. |
-| PP-21 | 가정 | 목록 응답은 페이지 번호 방식(WA-09)을 위해 전체 건수를 포함하는 것을 기본으로 한다. 불가하면 이전/다음만 둔다(API 명세에서 확정). |
+| PP-21 | 해결 | 목록 응답은 페이지 번호 방식(WA-09)을 위해 전체 건수를 포함하는 것을 기본으로 한다. 불가하면 이전/다음만 둔다(API 명세에서 확정). → 전체 건수 `totalCount`를 포함하는 것으로 확정(`backend/swagger.yaml`). |
 | PP-22 | 가정 | Access Token 페이로드는 `sub`(사용자 ID)·`iat`·`exp`만 담고, 비밀번호 변경 후에도 현재 세션을 유지한다(WA-06). 쿠키 이름은 `access_token`·`refresh_token`이다. 만료(Access 15분, Refresh 7일)는 env가 아니라 `lib/jwt.js` 상수다. |
 | PP-23 | 미결 | 비밀번호 변경 시 다른 기기의 Refresh Token 폐기 여부(PRD OQ-03). 재사용 탐지(토큰 계열 폐기)는 하지 않는다(PA-01). |

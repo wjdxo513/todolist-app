@@ -9,6 +9,9 @@
 | v0.3 | 2026-11-04 | jtaewu | 초안 | 문서 간 불일치 정리: 기준 문서 버전 갱신, D-14 SA 범위, 10장 불일치 7 처리 상태 |
 | v0.4 | 2026-11-04 | jtaewu | 초안 | D-01 해결, D-16~18 추가, 정렬 불일치 해결 |
 | v0.5 | 2026-11-04 | jtaewu | 초안 | D-16~18을 영향 Task의 선행 조건에 연결 |
+| v0.6 | 2026-11-04 | jtaewu | 초안 | DB 연결 환경 변수 이름을 `DB_CONN_STRING`으로 변경 |
+| v0.7 | 2026-11-04 | jtaewu | 초안 | PRE-01·PRE-02 완료, D-02·D-04~D-06·D-08·D-09 해결 |
+| v0.8 | 2026-11-04 | jtaewu | 초안 | BE-01·DB-01·DB-02 완료 |
 
 ## 변경 이력
 
@@ -31,10 +34,17 @@
 | v0.4 | 2026-11-04 | 9장 | 추가 | D-16(AD-16), D-17(AD-17), D-18(OQ-03·PP-23) 추가 | jtaewu |
 | v0.4 | 2026-11-04 | 10장 | 수정 | 불일치 3 해결(PRD·시나리오에 정렬 3순위 반영) | jtaewu |
 | v0.5 | 2026-11-04 | 6·7장 | 수정 | 9장 영향 Task와 일치하도록 BE-07 선행에 D-16, BE-08 선행에 D-18, FE-02 선행에 D-17 추가 | jtaewu |
+| v0.6 | 2026-11-04 | 머리말 | 수정 | 기준 문서 버전 갱신(5번 v0.5) | jtaewu |
+| v0.6 | 2026-11-04 | 6장 | 수정 | BE-01 `.env.example` 변수 목록의 `DATABASE_URL`을 `DB_CONN_STRING`으로 변경 | jtaewu |
+| v0.7 | 2026-11-04 | 머리말 | 수정 | 기준 문서 버전 갱신(5번 v0.6, 6번 v0.6) | jtaewu |
+| v0.7 | 2026-11-04 | 5장 | 수정 | PRE-01 산출물 `docs/9-style-guide.md`, PRE-02 대상을 `backend/swagger.yaml`로 변경, 두 Task 완료 조건 체크 | jtaewu |
+| v0.7 | 2026-11-04 | 9장 | 수정 | D-02·D-04·D-05·D-06·D-08·D-09 해결, D-07·D-10은 API 부분만 결정되었음을 기록 | jtaewu |
+| v0.7 | 2026-11-04 | 10장 | 수정 | 불일치 7의 `me` 엔드포인트가 PRE-02에서 `GET /api/users/me`로 정의되었음을 기록 | jtaewu |
+| v0.8 | 2026-11-04 | 6장 | 수정 | BE-01·DB-01·DB-02 완료 조건 체크(테스트 33건 통과, 커버리지 100%) | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.6), `3-user-scenario.md`(v0.5), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.4), `6-arch-diagram.md`(v0.5), `7-erd.md`(v0.4), `schema.sql`을 기준으로 한다. 규칙·요구사항·화면은 재정의하지 않고 ID(FR/NFR/BR/SN/E2E/ST/CV/WA/TP/SP/ER/AD/PP 등)로 참조한다.
+> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.6), `3-user-scenario.md`(v0.5), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.6), `6-arch-diagram.md`(v0.6), `7-erd.md`(v0.4), `schema.sql`을 기준으로 한다. 규칙·요구사항·화면은 재정의하지 않고 ID(FR/NFR/BR/SN/E2E/ST/CV/WA/TP/SP/ER/AD/PP 등)로 참조한다.
 
 ## 1. 개요와 Task 표기 규칙
 
@@ -68,7 +78,7 @@
 | ID     | 제목                                      | 대상      | 선행                              | 우선순위 | 배치    |
 | ------ | ----------------------------------------- | --------- | --------------------------------- | -------- | ------- |
 | PRE-01 | 스타일 가이드 확정                        | docs/     | 없음                              | P0       | 착수 전 |
-| PRE-02 | API 명세 확정                             | docs/     | 없음                              | P0       | 착수 전 |
+| PRE-02 | API 명세 확정                             | backend/  | 없음                              | P0       | 착수 전 |
 | BE-01  | 백엔드 프로젝트 세팅·환경 변수            | backend/  | 없음                              | P0       | D1 오전 |
 | DB-01  | 마이그레이션 러너                         | backend/  | BE-01                             | P0       | D1 오전 |
 | DB-02  | 초기 스키마 마이그레이션                  | backend/  | DB-01                             | P0       | D1 오전 |
@@ -221,7 +231,7 @@ PRD 9장의 마일스톤에 Task를 배치했다. 한 사람이 BE·FE를 모두
 
 ### PRE-01. 스타일 가이드 확정
 
-**대상:** `docs/` 아래 신규 문서 (프론트 스킬이 UI 개발 시 적용을 요구함, PP-15)
+**대상:** `docs/9-style-guide.md` (프론트 스킬이 UI 개발 시 적용을 요구함, PP-15) — **완료**
 
 **수행 작업**
 
@@ -231,10 +241,10 @@ PRD 9장의 마일스톤에 Task를 배치했다. 한 사람이 BE·FE를 모두
 
 **완료 조건**
 
-- [ ] `docs/` 아래에 스타일 가이드 문서가 있고 버전 이력·변경 이력 표를 갖는다
-- [ ] 상태 4종(시작 전·진행중·완료·기한 초과)의 색상 값이 정의되어 있고, 모양·선 모양(4번 문서 5.2)과 함께 쓰는 보조 수단임이 명시되어 있다(WA-19)
-- [ ] CSS 변수 목록(이름·값)이 표로 정의되어 있다
-- [ ] 5번 문서 PP-15를 해결로 바꿀 내용이 기록되어 있다
+- [x] `docs/` 아래에 스타일 가이드 문서가 있고 버전 이력·변경 이력 표를 갖는다
+- [x] 상태 4종(시작 전·진행중·완료·기한 초과)의 색상 값이 정의되어 있고, 모양·선 모양(4번 문서 5.2)과 함께 쓰는 보조 수단임이 명시되어 있다(WA-19)
+- [x] CSS 변수 목록(이름·값)이 표로 정의되어 있다
+- [x] 5번 문서 PP-15를 해결로 바꿀 내용이 기록되어 있다
 
 **선행 Task:** 없음 (D-02 결정 후 작성)
 
@@ -242,7 +252,7 @@ PRD 9장의 마일스톤에 Task를 배치했다. 한 사람이 BE·FE를 모두
 
 ### PRE-02. API 명세 확정
 
-**대상:** `docs/` 아래 신규 문서 (PRD 8장의 후속 문서, AD-01)
+**대상:** `backend/swagger.yaml` (PRD 8장의 후속 문서, AD-01. 사용자 결정으로 OpenAPI 파일을 유일한 API 계약으로 둔다) — **완료**
 
 **수행 작업**
 
@@ -252,11 +262,11 @@ PRD 9장의 마일스톤에 Task를 배치했다. 한 사람이 BE·FE를 모두
 
 **완료 조건**
 
-- [ ] 인증(가입·로그인·토큰 갱신·로그아웃, 갱신·로그아웃은 인증 미들웨어 없이 `refresh_token` 쿠키 사용), 현재 사용자·내 정보(조회·이름 수정·비밀번호 변경), 카테고리(조회·등록·수정·삭제), 할일(목록·단건·등록·수정·완료 처리·삭제·기간 조회), 헬스체크가 엔드포인트 표로 정의되어 있다
-- [ ] FR-01~FR-11, FR-13 각각에 대응 엔드포인트가 최소 하나 매핑되어 있다
-- [ ] 에러 `code` 목록이 NP-15 형식으로 정의되어 있고 `VALIDATION_ERROR`, `UNAUTHENTICATED`, `INVALID_CREDENTIALS`, `NOT_FOUND`, `TOO_MANY_ATTEMPTS`, `INTERNAL_ERROR`와 409 계열 `code`가 포함된다
-- [ ] D-04~D-11이 명세에 반영되어 있다(미반영 시 사유 기록)
-- [ ] 목록 응답의 전체 건수 포함 여부(PP-21)와 캘린더 결과 상한(AD-07)이 확정되어 있다
+- [x] 인증(가입·로그인·토큰 갱신·로그아웃, 갱신·로그아웃은 인증 미들웨어 없이 `refresh_token` 쿠키 사용), 현재 사용자·내 정보(조회·이름 수정·비밀번호 변경), 카테고리(조회·등록·수정·삭제), 할일(목록·단건·등록·수정·완료 처리·삭제·기간 조회), 헬스체크가 엔드포인트 표로 정의되어 있다
+- [x] FR-01~FR-11, FR-13 각각에 대응 엔드포인트가 최소 하나 매핑되어 있다
+- [x] 에러 `code` 목록이 NP-15 형식으로 정의되어 있고 `VALIDATION_ERROR`, `UNAUTHENTICATED`, `INVALID_CREDENTIALS`, `NOT_FOUND`, `TOO_MANY_ATTEMPTS`, `INTERNAL_ERROR`와 409 계열 `code`가 포함된다
+- [x] D-04~D-11이 명세에 반영되어 있다(미반영 시 사유 기록)
+- [x] 목록 응답의 전체 건수 포함 여부(PP-21)와 캘린더 결과 상한(AD-07)이 확정되어 있다
 
 **선행 Task:** 없음 (D-04~D-11 필요)
 
@@ -273,18 +283,18 @@ DB Task와 BE Task 모두 `/develop-backend`로 수행한다. 모든 BE 통합 �
 **수행 작업**
 
 - `backend/package.json`(ESM, Express 5, 5번 문서 2.4 허용 목록만, 스크립트 `dev`·`test`·`test:coverage`·`lint`·`format`), `eslint.config.js`(계층 위반 `no-restricted-imports`, LP-01), `vitest.config.js`(`process.env.TZ` 비UTC, 커버리지 `thresholds` 90%, TP-01 제외 목록).
-- `.env.example`(NODE_ENV, PORT, LOG_LEVEL, DATABASE_URL, TEST_DATABASE_URL, DB_POOL_MAX, JWT_SECRET, BCRYPT_COST, FRONTEND_ORIGIN)과 `src/config/env.js`(zod 검증, SP-01).
+- `.env.example`(NODE_ENV, PORT, LOG_LEVEL, DB_CONN_STRING, TEST_DATABASE_URL, DB_POOL_MAX, JWT_SECRET, BCRYPT_COST, FRONTEND_ORIGIN)과 `src/config/env.js`(zod 검증, SP-01).
 - 저장소 루트 `.editorconfig`, `.prettierrc`(TP-07).
 
 **완료 조건**
 
-- [ ] `npm run lint`, `npm test`, `npm run test:coverage`, `npm run format`이 존재하고 오류 없이 실행된다
-- [ ] `env.js`가 필수 변수 누락, `JWT_SECRET` 64자 미만, 숫자 변수 형식 오류에서 예외를 던지고 정상 값은 파싱한다(SP-01, SP-03)
-- [ ] `.env.example`의 변수 집합과 `env.js` 스키마의 변수 집합이 일치함을 테스트가 확인한다(SP-02)
-- [ ] 테스트 실행 중 `process.env.TZ`가 UTC가 아니다(TP-06)
-- [ ] ESLint가 `controllers`에서 `repositories`를 import하는 예시 파일을 오류로 보고한다(LP-01)
-- [ ] 루트에 `.editorconfig`, `.prettierrc`가 있다
-- [ ] 해당 범위 테스트 통과, 커버리지 90% 이상(TP-01)
+- [x] `npm run lint`, `npm test`, `npm run test:coverage`, `npm run format`이 존재하고 오류 없이 실행된다
+- [x] `env.js`가 필수 변수 누락, `JWT_SECRET` 64자 미만, 숫자 변수 형식 오류에서 예외를 던지고 정상 값은 파싱한다(SP-01, SP-03)
+- [x] `.env.example`의 변수 집합과 `env.js` 스키마의 변수 집합이 일치함을 테스트가 확인한다(SP-02)
+- [x] 테스트 실행 중 `process.env.TZ`가 UTC가 아니다(TP-06)
+- [x] ESLint가 `controllers`에서 `repositories`를 import하는 예시 파일을 오류로 보고한다(LP-01)
+- [x] 루트에 `.editorconfig`, `.prettierrc`가 있다
+- [x] 해당 범위 테스트 통과, 커버리지 90% 이상(TP-01)
 
 **선행 Task:** 없음 (D-01, D-10, D-15 참조)
 
@@ -302,11 +312,11 @@ DB Task와 BE Task 모두 `/develop-backend`로 수행한다. 모든 BE 통합 �
 
 **완료 조건**
 
-- [ ] 빈 `_test` DB에서 실행하면 임시 migrations 디렉토리의 파일이 순번대로 적용되고 `schema_migrations`에 filename이 기록된다
-- [ ] 재실행 시 이미 적용된 파일은 다시 실행되지 않는다
-- [ ] 중간 파일의 SQL 오류 시 그 파일의 변경이 전부 롤백되고 이력에 기록되지 않으며 종료 코드가 0이 아니다. 앞선 파일의 적용은 유지된다
-- [ ] 개발·테스트가 같은 러너를 쓴다(테스트 setup이 이 함수를 호출할 수 있는 형태로 export된다)
-- [ ] 해당 범위 테스트 통과, 커버리지 90% 이상(TP-01)
+- [x] 빈 `_test` DB에서 실행하면 임시 migrations 디렉토리의 파일이 순번대로 적용되고 `schema_migrations`에 filename이 기록된다
+- [x] 재실행 시 이미 적용된 파일은 다시 실행되지 않는다
+- [x] 중간 파일의 SQL 오류 시 그 파일의 변경이 전부 롤백되고 이력에 기록되지 않으며 종료 코드가 0이 아니다. 앞선 파일의 적용은 유지된다
+- [x] 개발·테스트가 같은 러너를 쓴다(테스트 setup이 이 함수를 호출할 수 있는 형태로 export된다)
+- [x] 해당 범위 테스트 통과, 커버리지 90% 이상(TP-01)
 
 **선행 Task:** BE-01
 
@@ -323,12 +333,12 @@ DB Task와 BE Task 모두 `/develop-backend`로 수행한다. 모든 BE 통합 �
 
 **완료 조건**
 
-- [ ] DB-01 러너로 빈 `_test` DB에 적용하면 `users`, `categories`, `todos`, `refresh_tokens`, `schema_migrations`가 생성된다
-- [ ] `pg_catalog` 조회로 제약 10종(`uq_users_email`, `ck_users_email_lower`, `uq_categories_user_id_name`, `uq_categories_id_user_id`, `ck_todos_end_date_gte_start_date`, `fk_categories_user_id`, `fk_todos_user_id`, `fk_todos_category_id_user_id`, `uq_refresh_tokens_token_hash`, `fk_refresh_tokens_user_id`)과 인덱스 4종(`uq_categories_user_id_default`, `idx_todos_user_id_end_date_created_at_id`, `idx_todos_user_id_category_id`, `idx_refresh_tokens_user_id`)의 이름·정의가 7번 문서와 일치한다
-- [ ] `docs/schema.sql`을 임시 스키마에 실행한 결과와 `0001_init.sql` 적용 결과의 컬럼(이름·타입·NULL·기본값)·제약·인덱스 정의가 동일하다
-- [ ] 제약 동작: 대문자 이메일·중복 이메일 거부, 같은 사용자 카테고리 이름 중복 거부, 사용자당 기본 카테고리 2개째 거부, `end_date < start_date` 거부·같은 날 허용, 타인 카테고리를 참조하는 todo INSERT 거부(23503), todo가 있는 카테고리 DELETE 거부(23503), `memo` NULL 허용, 중복 `token_hash` 거부, 없는 사용자를 참조하는 `refresh_tokens` INSERT 거부(23503), `refresh_tokens` 행이 있는 사용자 DELETE 거부(23503, ER-06)
-- [ ] `todos`에 `status` 컬럼이 없다(BR-13)
-- [ ] 해당 범위 테스트 통과, 커버리지 90% 이상(TP-01)
+- [x] DB-01 러너로 빈 `_test` DB에 적용하면 `users`, `categories`, `todos`, `refresh_tokens`, `schema_migrations`가 생성된다
+- [x] `pg_catalog` 조회로 제약 10종(`uq_users_email`, `ck_users_email_lower`, `uq_categories_user_id_name`, `uq_categories_id_user_id`, `ck_todos_end_date_gte_start_date`, `fk_categories_user_id`, `fk_todos_user_id`, `fk_todos_category_id_user_id`, `uq_refresh_tokens_token_hash`, `fk_refresh_tokens_user_id`)과 인덱스 4종(`uq_categories_user_id_default`, `idx_todos_user_id_end_date_created_at_id`, `idx_todos_user_id_category_id`, `idx_refresh_tokens_user_id`)의 이름·정의가 7번 문서와 일치한다
+- [x] `docs/schema.sql`을 임시 스키마에 실행한 결과와 `0001_init.sql` 적용 결과의 컬럼(이름·타입·NULL·기본값)·제약·인덱스 정의가 동일하다
+- [x] 제약 동작: 대문자 이메일·중복 이메일 거부, 같은 사용자 카테고리 이름 중복 거부, 사용자당 기본 카테고리 2개째 거부, `end_date < start_date` 거부·같은 날 허용, 타인 카테고리를 참조하는 todo INSERT 거부(23503), todo가 있는 카테고리 DELETE 거부(23503), `memo` NULL 허용, 중복 `token_hash` 거부, 없는 사용자를 참조하는 `refresh_tokens` INSERT 거부(23503), `refresh_tokens` 행이 있는 사용자 DELETE 거부(23503, ER-06)
+- [x] `todos`에 `status` 컬럼이 없다(BR-13)
+- [x] 해당 범위 테스트 통과, 커버리지 90% 이상(TP-01)
 
 **선행 Task:** DB-01
 
@@ -1225,15 +1235,15 @@ FE Task는 모두 `/develop-frontend`로 수행하며, 네트워크는 MSW로 �
 | ID   | 출처                              | 내용                                                                                                                                                                                                                        | 영향 Task                                     | 필요 시점       |
 | ---- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | --------------- |
 | D-01 | PP-16 | **해결.** 두 스킬 파일의 계획 문서 경로를 `docs/5-plan.md`에서 `docs/8-plan.md`로 수정했다 | 모든 DB·BE·FE Task(스킬 실행) | 완료 |
-| D-02 | PP-15                             | 스타일 가이드 부재. 프론트 스킬이 UI 개발 시 적용을 요구하며 PP-15는 가이드 작성 전 `components/ui` 구현을 금지                                                                                                             | PRE-01 → FE-04 이후 모든 UI Task(FE-04~FE-16) | FE-04 전        |
+| D-02 | PP-15 | **해결.** `docs/9-style-guide.md` 작성(PRE-01), PP-15 해결 | PRE-01 → FE-04 이후 모든 UI Task(FE-04~FE-16) | 해결 |
 | D-03 | PP-13, WA-13, 4번 5.3             | date picker 방식: 네이티브 `<input type="date">`(PP-13 제안) 대 직접 입력 불가 팝업(5.3). 종료일<시작일 선택을 막지 않는 WA-13과의 정합                                                                                     | FE-05, FE-10                                  | FE-05 전        |
-| D-04 | AD-01, PP-11, PP-14, PP-21, WA-09 | API 명세 전체(경로·필드·상태 값 표기·409 `code` 목록·목록 전체 건수·캘린더 조회 리소스 형태)                                                                                                                                | PRE-02 → BE-06~BE-14, FE-02, 이후 FE 전부     | BE-06, FE-02 전 |
-| D-05 | AD-03                             | 완료 토글이 전체 수정과 같은 요청인지 부분 수정인지. 부분 수정이면 BR-05을 서비스에서 기존 값과 비교해 검증                                                                                                                 | BE-12, FE-12                                  | BE-12 전        |
-| D-06 | AD-04                             | 현재 비밀번호 불일치의 상태 코드·`code`. 401이면 LP-09 이동 규칙과 `code`로 구분 필요                                                                                                                                       | BE-08, FE-08                                  | BE-08 전        |
-| D-07 | AD-05                             | 로그인 차단 세부(차단 중 시도의 연장 여부, 차단 해제 후 초기화, 기록 만료·정리)                                                                                                                                             | BE-07                                         | BE-07 전        |
-| D-08 | AD-07                             | 캘린더 조회 결과 상한·정렬·범위 최대 길이                                                                                                                                                                                   | BE-14, FE-13~FE-16, INT-02                    | BE-14 전        |
-| D-09 | AD-08                             | 목록 카테고리 필터 ID가 없는·타인 ID일 때 응답, 카테고리 삭제 후 필터 초기화 시점                                                                                                                                           | BE-13, FE-09, FE-11                           | BE-13 전        |
-| D-10 | AD-11, AD-12, AD-14               | 경로 ID 형식 오류(400/404), 미등록 경로·JSON 파싱 오류·본문 초과의 NP-15 적용, 미들웨어 등록 순서, `validators → domain` import 허용                                                                                        | BE-01(ESLint 규칙), BE-03, BE-04, BE-09~BE-12 | BE-03 전        |
+| D-04 | AD-01, PP-11, PP-14, PP-21, WA-09 | **해결.** API 명세를 `backend/swagger.yaml`로 확정(PRE-02). 상태 값 표기는 도메인 4장 한글 라벨(`시작 전`·`진행중`·`완료`·`기한 초과`), 목록은 `totalCount` 포함, 캘린더는 `GET /api/todos/calendar` | PRE-02 → BE-06~BE-14, FE-02, 이후 FE 전부 | 해결 |
+| D-05 | AD-03 | **해결.** 별도 부분 수정 `PATCH /api/todos/{id}/completion`(BR-05 재검증 불필요) | BE-12, FE-12 | 해결 |
+| D-06 | AD-04 | **해결.** 400 `VALIDATION_ERROR` + `fields.currentPassword` | BE-08, FE-08 | 해결 |
+| D-07 | AD-05 | 로그인 차단 세부(차단 중 시도의 연장 여부, 차단 해제 후 초기화, 기록 만료·정리). API 명세에서 차단 중 시도 미연장·해제 후 0으로 초기화로 결정. 기록 만료·정리만 남음 | BE-07 | BE-07 전 |
+| D-08 | AD-07 | **해결.** 결과 상한·페이지 없음, 범위 최대 42일(초과 400), 정렬은 목록과 동일 | BE-14, FE-13~FE-16, INT-02 | 해결 |
+| D-09 | AD-08 | **해결.** 없는·타인 ID는 404 `NOT_FOUND`, 필터 초기화는 삭제 성공 시 프론트(LP-12) | BE-13, FE-09, FE-11 | 해결 |
+| D-10 | AD-11, AD-12, AD-14 | 경로 ID 형식 오류(400/404), 미등록 경로·JSON 파싱 오류·본문 초과의 NP-15 적용, 미들웨어 등록 순서, `validators → domain` import 허용. API 명세에서 경로 ID 형식 오류·미등록 경로 404, JSON 파싱 오류·본문 초과 400(NP-15 형식)으로 결정. 미들웨어 등록 순서와 `validators → domain` import만 남음 | BE-01(ESLint 규칙), BE-03, BE-04, BE-09~BE-12 | BE-03 전 |
 | D-11 | AD-13                             | **해결.** 로그아웃 API는 인증 미들웨어 없이 `refresh_token` 쿠키로 행을 삭제하고 항상 204로 응답한다(BE-07). 로그아웃·갱신 실패 시 서버 데이터 캐시 비움은 FE-03·FE-07 완료 조건으로 확정                                                | BE-07, FE-07 (반영 완료)                      | 해결            |
 | D-12 | AD-02                             | 프론트 정적 자원 제공 주체(리버스 프록시/Express), TLS 종단 위치. 이 계획에는 배포 Task가 없다                                                                                                                              | INT-02(부하 시 진입점 구성)                   | INT-02 전       |
 | D-13 | 문서 없음(신규 발견)              | 캘린더 화면 진입 시 초기 뷰(월/주/일)                                                                                                                                                                                       | FE-03, FE-14                                  | FE-03 전        |
@@ -1257,5 +1267,5 @@ FE Task는 모두 `/develop-frontend`로 수행하며, 네트워크는 MSW로 �
 | 4    | PRD 9장 일정은 BE·FE를 구분하지 않아 D1 오전에 FR-01·02·11의 화면까지 포함되나 1인 일정에는 과다                                                                                | 4장: FE 인증 화면은 D1 오후, 캘린더 월·주는 D2 오후로 배치, 줄이는 순서는 R-01                                           |
 | 5    | PRD 9장은 NFR-12(5xx 로그)를 D2 오후에 두나 5번 SP-09의 로거 기반은 초반에 필요                                                                                                 | BE-02에서 구축, BE-15에서 검증                                                                                           |
 | 6    | 4번 문서 5.3·WA-13은 '직접 입력 불가 팝업', 5번 PP-13은 네이티브 `<input type="date">` 제안                                                                                     | D-03                                                                                                                     |
-| 7    | 5번 문서 6.1의 `docs/` 설명이 '1~5번 문서'이나 현재 1~8번과 `schema.sql`이 있음. `me`(현재 사용자) 조회는 6번 문서 시퀀스·5번 `features/auth`에 등장하나 엔드포인트 정의가 없음 | 7의 docs 설명은 5번 v0.3에서 정정됨. `me`는 PRE-02에서 포함, BE-07에 me 조회 배치                                        |
+| 7    | 5번 문서 6.1의 `docs/` 설명이 '1~5번 문서'이나 현재 1~8번과 `schema.sql`이 있음. `me`(현재 사용자) 조회는 6번 문서 시퀀스·5번 `features/auth`에 등장하나 엔드포인트 정의가 없음 | 7의 docs 설명은 5번 v0.3에서 정정됨. `me`는 PRE-02에서 `GET /api/users/me`로 정의, BE-07에 me 조회 배치                                        |
 | 8    | 도메인 3·6번 문서가 정하지 않은 캘린더 초기 뷰                                                                                                                                  | D-13                                                                                                                     |

@@ -1,0 +1,1 @@
+@docs\7-erd.md 를 활용해 데이터베이스 생성을 위한 DDL 문을 작성해서 docs/schema.sql 파일에 저장해줘
