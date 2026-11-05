@@ -1,0 +1,120 @@
+.badge {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.todo {
+  --tone-bg: var(--color-status-todo-bg);
+  --tone-text: var(--color-status-todo-text);
+  --tone-border: var(--color-status-todo-border);
+  --tone-bar: var(--color-status-todo-bar);
+}
+
+.progress {
+  --tone-bg: var(--color-status-progress-bg);
+  --tone-text: var(--color-status-progress-text);
+  --tone-border: var(--color-status-progress-border);
+  --tone-bar: var(--color-status-progress-bar);
+}
+
+.done {
+  --tone-bg: var(--color-status-done-bg);
+  --tone-text: var(--color-status-done-text);
+  --tone-border: var(--color-status-done-border);
+  --tone-bar: var(--color-status-done-bar);
+}
+
+.overdue {
+  --tone-bg: var(--color-status-overdue-bg);
+  --tone-text: var(--color-status-overdue-text);
+  --tone-border: var(--color-status-overdue-border);
+  --tone-bar: var(--color-status-overdue-bar);
+}
+
+.badge.todo,
+.badge.progress,
+.badge.done,
+.badge.overdue {
+  border-color: var(--tone-border);
+  background: var(--tone-bg);
+  color: var(--tone-text);
+}
+
+/* 블록형 막대: 높이 20px, 연한 배경, 아래쪽 선 모양으로 상태 구분(스타일 가이드 2장) */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  height: 20px;
+  min-width: 0;
+  padding: 0 var(--space-1);
+  border: 0;
+  border-bottom: 2px solid var(--tone-bar);
+  border-radius: var(--radius-sm);
+  background: var(--tone-bg);
+  color: var(--tone-text);
+  font-size: var(--font-size-xs);
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.bar.todo {
+  border-bottom-style: dashed;
+}
+
+.bar.overdue {
+  border-bottom-width: 4px;
+}
+
+/* 물결은 border로 만들 수 없어 막대 요소의 밑줄로 그린다 */
+.bar.done {
+  border-bottom: 0;
+  text-decoration: underline wavy var(--tone-bar) 2px;
+  text-underline-offset: 3px;
+}
+
+.contLeft {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.contRight {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.shape {
+  flex: none;
+  font-weight: var(--font-weight-bold);
+}
+
+.barTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barTitle[data-done] {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.detail {
+  color: var(--color-text-muted);
+}
+
+.right {
+  margin-left: auto;
+  flex: none;
+}

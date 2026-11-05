@@ -1,0 +1,72 @@
+/* docs/9-style-guide.md v0.2 3장. 이름·값은 tokens.test.ts가 문서 표와 대조한다 */
+:root {
+  /* 3.1 기본 색상 */
+  --color-bg: #ffffff;
+  --color-surface: #f8f9fa;
+  --color-text: #212529;
+  --color-text-muted: #5c6570;
+  --color-border: #ced4da;
+  --color-grid-line: #e9ecef;
+  --color-primary: #5b4fe9;
+  --color-primary-hover: #4a3dd4;
+  --color-primary-text: #ffffff;
+  --color-primary-subtle: #efedfd;
+  --color-danger: #c62828;
+  --color-danger-hover: #a61b1b;
+  --color-danger-text: #ffffff;
+  --color-error-bg: #fdecea;
+  --color-error-text: #a61b1b;
+  --color-error-border: #e58a8a;
+  --color-disabled-bg: #e9ecef;
+  --color-disabled-text: #868e96;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+
+  /* 3.2 상태 색상 */
+  --color-status-todo-bg: #f1f3f5;
+  --color-status-todo-text: #495057;
+  --color-status-todo-border: #adb5bd;
+  --color-status-todo-bar: #868e96;
+  --color-status-progress-bg: #e7f1ff;
+  --color-status-progress-text: #0b4f9e;
+  --color-status-progress-border: #74a9e8;
+  --color-status-progress-bar: #1c6dd0;
+  --color-status-done-bg: #e6f4ea;
+  --color-status-done-text: #1e6b34;
+  --color-status-done-border: #7cc090;
+  --color-status-done-bar: #2e8b4a;
+  --color-status-overdue-bg: #fdecea;
+  --color-status-overdue-text: #a61b1b;
+  --color-status-overdue-border: #e58a8a;
+  --color-status-overdue-bar: #d32f2f;
+
+  /* 3.3 캘린더 색상 */
+  --color-calendar-today-bg: #eef3fa;
+  --color-calendar-today-border: #343a40;
+  --color-calendar-sunday: #c92a2a;
+  --color-calendar-outside: #6c757d;
+
+  /* 3.4 글꼴·간격·모서리·그림자·레이아웃 */
+  --font-family:
+    system-ui, -apple-system, 'Segoe UI', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR',
+    sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+  --font-line-height: 1.5;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --shadow-dialog: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --layout-header-height: 56px;
+  --layout-max-width: 960px;
+  --layout-max-width-wide: 1280px;
+}

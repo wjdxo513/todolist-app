@@ -1,0 +1,94 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.add {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.row + .row {
+  border-top: 1px solid var(--color-grid-line);
+}
+
+.name {
+  font-weight: var(--font-weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.tag,
+.muted {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+}
+
+.buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .add {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .add > :first-child {
+    flex: 1;
+  }
+
+  .add > button {
+    margin-top: 26px;
+  }
+
+  .row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .editForm {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .editForm > :first-child {
+    flex: 1;
+  }
+
+  .editForm .buttons {
+    margin-top: 26px;
+  }
+}

@@ -1,0 +1,248 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.filterLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.select {
+  min-width: 0;
+  flex: 1;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+/* 세그먼트 버튼(스타일 가이드 4장): 데스크톱에서만 */
+.segment {
+  display: none;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.segment legend {
+  float: left;
+  margin-right: var(--space-2);
+}
+
+.segmentItem {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.segmentItem + .segmentItem {
+  border-left: 0;
+}
+
+.segmentItem:first-of-type {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.segmentItem:last-of-type {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.segmentItem[data-checked] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.segmentItem:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.sort {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* 모바일: 카드 목록 */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.header {
+  display: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'toggle title'
+    '. meta'
+    '. status';
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.toggle {
+  grid-area: toggle;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+}
+
+.titleLink {
+  grid-area: title;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.titleLink:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.titleLink[data-done] {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.category,
+.period {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.category {
+  grid-area: meta;
+}
+
+.period {
+  grid-area: meta;
+  justify-self: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  grid-area: status;
+}
+
+.actions {
+  grid-area: status;
+  justify-self: end;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.mobileOnly {
+  display: flex;
+}
+
+@media (min-width: 768px) {
+  .filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-5);
+  }
+
+  .select {
+    flex: none;
+  }
+
+  .segment {
+    display: flex;
+  }
+
+  .mobileOnly {
+    display: none;
+  }
+
+  .list {
+    gap: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+  }
+
+  .header,
+  .row {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 2fr) minmax(0, 1fr) 140px 120px 136px;
+    grid-template-areas: none;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border: 0;
+    border-radius: 0;
+  }
+
+  .header {
+    background: var(--color-surface);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .row {
+    border-top: 1px solid var(--color-grid-line);
+  }
+
+  .row:hover {
+    background: var(--color-surface);
+  }
+
+  .toggle,
+  .titleLink,
+  .category,
+  .period,
+  .status,
+  .actions {
+    grid-area: auto;
+    justify-self: start;
+    margin: 0;
+  }
+}

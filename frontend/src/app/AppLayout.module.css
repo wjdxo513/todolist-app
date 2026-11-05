@@ -1,0 +1,16 @@
+.main {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.main[data-wide] {
+  max-width: var(--layout-max-width-wide);
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding: var(--space-6);
+  }
+}

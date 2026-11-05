@@ -1,0 +1,246 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+/* 상단 줄: 이동 버튼 / 범위 제목 / 세그먼트(스타일 가이드 4장) */
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'nav segment'
+    'title title';
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.nav {
+  grid-area: nav;
+  display: flex;
+  gap: var(--space-1);
+}
+
+.rangeTitle {
+  grid-area: title;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.segment {
+  grid-area: segment;
+  display: flex;
+}
+
+.segmentItem {
+  min-width: 44px;
+  height: 28px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.segmentItem + .segmentItem {
+  border-left: 0;
+}
+
+.segmentItem:first-child {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.segmentItem:last-child {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.segmentItem[aria-checked='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  font-weight: var(--font-weight-bold);
+}
+
+/* 그리드: 가는 선, 일요일 빨강, 오늘 칸 강조 */
+.grid {
+  border: 1px solid var(--color-grid-line);
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--color-grid-line);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.weekdays span {
+  padding: var(--space-1) var(--space-2);
+}
+
+.sunday {
+  color: var(--color-calendar-sunday);
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: 24px repeat(3, 24px) 20px;
+  min-height: 64px;
+}
+
+.week + .week {
+  border-top: 1px solid var(--color-grid-line);
+}
+
+.day {
+  grid-row: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-left: 1px solid var(--color-grid-line);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  text-align: left;
+  cursor: pointer;
+}
+
+.day:first-child {
+  border-left: 0;
+}
+
+.day:hover {
+  background: var(--color-surface);
+}
+
+.day[data-sunday] .dayNumber {
+  color: var(--color-calendar-sunday);
+}
+
+.day[data-outside] .dayNumber {
+  color: var(--color-calendar-outside);
+}
+
+.day[data-today] {
+  background: var(--color-calendar-today-bg);
+  box-shadow: inset 0 0 0 1px var(--color-calendar-today-border);
+}
+
+.day[data-today] .dayNumber {
+  font-weight: var(--font-weight-bold);
+}
+
+.todayMark {
+  color: var(--color-text-muted);
+}
+
+.barSlot {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: 0 1px;
+  align-self: center;
+}
+
+.more {
+  position: relative;
+  z-index: 1;
+  justify-self: start;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.dayList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dayItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-grid-line);
+}
+
+.dayTitle {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.dayTitle[data-done] {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.muted {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: var(--space-4);
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas: 'nav title segment';
+  }
+
+  .segment {
+    justify-self: end;
+  }
+
+  .week {
+    min-height: 96px;
+  }
+
+  .grid[data-view='week'] .week {
+    min-height: 160px;
+    grid-template-rows: 28px repeat(3, 24px) 20px;
+  }
+
+  .day {
+    font-size: var(--font-size-xs);
+  }
+
+  .grid[data-view='week'] .day {
+    font-size: var(--font-size-sm);
+  }
+}

@@ -35,6 +35,7 @@
 | v0.6 | 2026-11-04 | 7장 | 수정 | PP-11·PP-14·PP-21 해결(API 명세 `backend/swagger.yaml` v0.2), PP-15 해결(`9-style-guide.md`) | jtaewu |
 | v0.7 | 2026-11-04 | 7장 | 수정 | PP-23 해결(다른 기기 Refresh 폐기 안 함, D-18), PP-09에 실패 기록 정리 정책(D-07) | jtaewu |
 | v0.8 | 2026-11-05 | 5·7장 | 수정 | SP-07·PP-03·PP-12·`VITE_API_BASE_URL`: 같은 출처/Vite 프록시 → 개발·운영 CORS(같은 사이트, 다른 출처). `FRONTEND_ORIGIN` 쉼표 다중 출처·운영 필수 | jtaewu |
+| v0.8 | 2026-11-05 | 2장 | 추가 | 2.4에 FE 개발 보조 라이브러리 행 추가(FE-01: testing-library/dom, 타입 선언, @eslint/js, globals) | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
@@ -143,6 +144,7 @@
 | FE 개발 | `vite`, `@vitejs/plugin-react`, `typescript` | 빌드·번들·타입 검사 |
 | FE 개발 | `vitest`, `@vitest/coverage-v8`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`, `msw` | 컴포넌트 테스트와 네트워크 계층 모킹(TP-05) |
 | 공통 개발 | `eslint`, `typescript-eslint`(FE), `eslint-plugin-react-hooks`(FE), `prettier` | 린트·포맷(TP-07) |
+| FE 개발 | `@testing-library/dom`, `@types/react`, `@types/react-dom`, `@types/node`, `@eslint/js`, `globals` | 위 도구의 peer 의존성·타입 선언·ESLint 기본 규칙과 전역 목록(FE-01에서 추가) |
 
 도입하지 않는 것(필요 시 PP로 재결정): ORM·쿼리 빌더(Prisma, Knex 등), axios, Redux, lodash, moment·dayjs·date-fns, 캘린더·date picker 라이브러리, UI 프레임워크, react-hook-form, passport, express-rate-limit, dotenv(Node `--env-file` 사용), nodemon(`node --watch` 사용), helmet.
 

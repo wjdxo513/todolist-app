@@ -9,3 +9,8 @@ health check endpoint에 DB연결상태도 추가해줘.
 Cross Origin 문제를 해결하기 위해 이 프로젝트에서는 Proxy 방식, CORS 방식 중 어떤 방식을 적용하고 있어?
 
 CORS 오리진을 환경변수로 설정하도록 업데이트해줘.
+
+이미지는 ALT +V로 붙여넣기
+❯ [Image #2] [Image #3] [Image #4]
+첨부한 이미지와 와이어프레임 문서를 검토해 이 앱에 적합한 스타일 가이드를 생성해서
+docs/style-guild.md에 저장해줘. CLAUDE.md의 목록에도 추가해줘
