@@ -812,7 +812,7 @@ FE Task는 모두 `/develop-frontend`로 수행하며, 네트워크는 MSW로 �
 **수행 작업**
 
 - `lib/date.ts`: `todayLocal()`, 정수 연·월·일 기반 날짜 덧셈·월/주(일~토) 범위·비교·`MM-DD` 표기(WA-24), 모두 문자열 반환(NP-20, NP-21). `lib/limits.ts`(AS-08 상수). 화면 경로 상수는 `lib/` 아래 한 모듈(LP-14).
-- `api/client.ts`: 단일 `fetch` 래퍼(`credentials: 'include'`, JSON, `ApiError{status, code, message, fields}`, `VITE_API_BASE_URL`을 읽는 유일한 모듈). `/api/auth/*`가 아닌 요청이 401 `UNAUTHENTICATED`를 받으면 `POST /api/auth/refresh`를 한 번 호출하고 성공하면 원래 요청을 한 번 재시도한다. 동시 401에도 갱신 요청은 하나만 보내고 나머지는 그 결과를 기다린다(single-flight). 갱신 실패 시 원래 401을 던진다(LP-08), `api/auth.ts`, `users.ts`, `categories.ts`, `todos.ts`, `types.ts`. 경로·필드는 PRE-02를 따른다.
+- `api/client.ts`: 단일 `fetch` 래퍼(`credentials: 'include'`, JSON, `ApiError{status, code, message, fields}`, API 기준 URL을 쓰는 유일한 모듈(값은 `lib/env.ts`가 읽음)). `/api/auth/*`가 아닌 요청이 401 `UNAUTHENTICATED`를 받으면 `POST /api/auth/refresh`를 한 번 호출하고 성공하면 원래 요청을 한 번 재시도한다. 동시 401에도 갱신 요청은 하나만 보내고 나머지는 그 결과를 기다린다(single-flight). 갱신 실패 시 원래 401을 던진다(LP-08), `api/auth.ts`, `users.ts`, `categories.ts`, `todos.ts`, `types.ts`. 경로·필드는 PRE-02를 따른다.
 
 **완료 조건**
 

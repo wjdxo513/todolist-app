@@ -4,6 +4,7 @@ import { logIn, logOut, signUp } from '../../api/auth';
 import { isApiError } from '../../api/client';
 import type { User } from '../../api/types';
 import { getMe } from '../../api/users';
+import { logger } from '../../lib/logger';
 import { queryKeys } from '../../lib/queryKeys';
 import { ROUTES } from '../../lib/routes';
 import { useSessionStore } from '../../stores/sessionStore';
@@ -19,7 +20,10 @@ export function useMe() {
       try {
         return await getMe();
       } catch (e) {
-        if (isApiError(e) && e.status === 401) return null;
+        if (isApiError(e) && e.status === 401) {
+          logger.info('auth', '로그인되지 않은 상태(me 401)');
+          return null;
+        }
         throw e;
       }
     },
@@ -32,7 +36,10 @@ export function useSignup() {
   return useMutation({
     mutationFn: signUp,
     // 자동 로그인 없이 로그인 화면으로, 안내는 이동 상태로 전달(SA-01, WA-02)
-    onSuccess: () => navigate(ROUTES.login, { state: { signedUp: true } }),
+    onSuccess: (user) => {
+      logger.info('auth', `가입 완료(user ${user.id}), 로그인 화면으로 이동`);
+      return navigate(ROUTES.login, { state: { signedUp: true } });
+    },
   });
 }
 
@@ -42,6 +49,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: logIn,
     onSuccess: (user) => {
+      logger.info('auth', `로그인 성공(user ${user.id})`);
       useSessionStore.getState().setExpired(false);
       qc.setQueryData(queryKeys.me, user);
       navigate(ROUTES.todos, { replace: true }); // SA-02, SA-04
@@ -56,6 +64,7 @@ export function useLogout() {
     mutationFn: logOut,
     onSuccess: () => {
       // 이전 사용자 데이터 제거(E2E-02). me를 null로 두어 로그인 화면이 갱신 요청을 하지 않게 한다(AD-13)
+      logger.info('auth', '로그아웃: 캐시를 비우고 로그인 화면으로 이동');
       qc.clear();
       qc.setQueryData(queryKeys.me, null);
       navigate(ROUTES.login, { replace: true });

@@ -1,5 +1,6 @@
 // 할일 목록 필터·페이지(LP-12). 필터를 바꾸면 1페이지로 돌아간다(WA-09).
 import { create } from 'zustand';
+import { logger } from '../lib/logger';
 
 export type StatusFilter = '시작 전' | '진행중' | '완료' | '기한 초과';
 
@@ -25,3 +26,8 @@ export const useTodoFilterStore = create<TodoFilterState>()((set, get) => ({
     if (get().categoryId === categoryId) set({ categoryId: null, page: 1 });
   },
 }));
+
+// 개발 모드에서 필터·페이지 변경 기록
+useTodoFilterStore.subscribe(({ categoryId, status, page }) =>
+  logger.debug('store', '할일 필터', { categoryId, status, page }),
+);

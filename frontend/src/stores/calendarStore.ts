@@ -1,6 +1,7 @@
 // 캘린더 뷰 종류·기준일(LP-12, WA-17). 첫 진입은 월 뷰(D-13).
 import { create } from 'zustand';
 import { addDays, addMonths, todayLocal, type DateString } from '../lib/date';
+import { logger } from '../lib/logger';
 
 export type CalendarView = 'month' | 'week' | 'day';
 
@@ -25,3 +26,8 @@ export const useCalendarStore = create<CalendarState>()((set) => ({
   goToday: () => set({ baseDate: todayLocal() }),
   openDay: (date) => set({ view: 'day', baseDate: date }),
 }));
+
+// 개발 모드에서 뷰·기준일 변경 기록
+useCalendarStore.subscribe(({ view, baseDate }) =>
+  logger.debug('store', '캘린더', { view, baseDate }),
+);
