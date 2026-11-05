@@ -1,7 +1,7 @@
 .page {
   display: flex;
   justify-content: center;
-  padding: var(--space-6) var(--space-4);
+  padding: 10vh var(--space-4) var(--space-6);
 }
 
 .card {
@@ -10,16 +10,34 @@
   gap: var(--space-4);
   width: 100%;
   max-width: 420px;
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  padding: var(--space-6) var(--space-5);
+  border: 1px solid var(--color-grid-line);
+  border-radius: var(--radius-lg);
   background: var(--color-bg);
+  box-shadow: var(--shadow-card);
 }
 
 .brand {
-  font-size: var(--font-size-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  letter-spacing: var(--font-tracking-tight);
+}
+
+.brand::before {
+  content: '✓';
+  content: '✓' / ''; /* 장식: 보조기기에 읽히지 않게 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  font-size: var(--font-size-sm);
 }
 
 .title {
@@ -33,7 +51,20 @@
   gap: var(--space-4);
 }
 
+.form > button[type='submit'] {
+  margin-top: var(--space-2);
+}
+
 .footer {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-grid-line);
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: var(--space-6);
+  }
 }

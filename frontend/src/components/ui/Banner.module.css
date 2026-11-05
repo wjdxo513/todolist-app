@@ -12,7 +12,7 @@
 }
 
 .notice {
-  border-color: var(--color-primary);
+  border-color: var(--color-primary-subtle);
   background: var(--color-primary-subtle);
   color: var(--color-text);
 }

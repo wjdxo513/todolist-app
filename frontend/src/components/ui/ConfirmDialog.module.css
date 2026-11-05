@@ -13,7 +13,7 @@
   width: 100%;
   max-width: 420px;
   padding: var(--space-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--color-bg);
   box-shadow: var(--shadow-dialog);
 }
@@ -25,6 +25,7 @@
 
 .message {
   margin-top: var(--space-3);
+  color: var(--color-text-muted);
 }
 
 .actions {

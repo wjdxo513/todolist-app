@@ -29,68 +29,76 @@
 }
 
 .filterLabel {
+  color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
 }
 
 .select {
   min-width: 0;
   flex: 1;
+  min-height: 36px;
   padding: var(--space-1) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg);
+  font-size: var(--font-size-sm);
 }
 
-/* 세그먼트 버튼(스타일 가이드 4장): 데스크톱에서만 */
+.select:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* 세그먼트 버튼(스타일 가이드 4장): 트랙 안에서 선택 항목만 흰 칩으로 떠오른다. 데스크톱에서만 */
 .segment {
   display: none;
   align-items: center;
+  gap: 2px;
   margin: 0;
-  padding: 0;
+  padding: 3px;
   border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-grid-line);
 }
 
 .segment legend {
   float: left;
   margin-right: var(--space-2);
+  padding-left: var(--space-1);
 }
 
 .segmentItem {
   padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
 
-.segmentItem + .segmentItem {
-  border-left: 0;
-}
-
-.segmentItem:first-of-type {
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-}
-
-.segmentItem:last-of-type {
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+.segmentItem:hover {
+  color: var(--color-text);
 }
 
 .segmentItem[data-checked] {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  color: var(--color-primary-text);
-  font-weight: var(--font-weight-bold);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: var(--shadow-card);
 }
 
 .segmentItem:focus-within {
   outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
 .sort {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
@@ -115,11 +123,12 @@
     'toggle title'
     '. meta'
     '. status';
-  gap: var(--space-1) var(--space-2);
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-grid-line);
+  border-radius: var(--radius-lg);
   background: var(--color-bg);
+  box-shadow: var(--shadow-card);
 }
 
 .toggle {
@@ -127,6 +136,7 @@
   width: 18px;
   height: 18px;
   margin-top: 3px;
+  cursor: pointer;
 }
 
 .titleLink {
@@ -135,7 +145,7 @@
   border: 0;
   background: none;
   color: var(--color-text);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   text-align: left;
   cursor: pointer;
   overflow-wrap: anywhere;
@@ -143,11 +153,11 @@
 
 .titleLink:hover {
   color: var(--color-primary);
-  text-decoration: underline;
 }
 
 .titleLink[data-done] {
   color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
   text-decoration: line-through;
 }
 
@@ -204,9 +214,11 @@
 
   .list {
     gap: 0;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--color-grid-line);
+    border-radius: var(--radius-lg);
     background: var(--color-bg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
   }
 
   .header,
@@ -216,19 +228,23 @@
     grid-template-areas: none;
     align-items: center;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
     border: 0;
     border-radius: 0;
+    box-shadow: none;
   }
 
   .header {
+    padding-block: var(--space-2);
     background: var(--color-surface);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-bold);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
   }
 
   .row {
     border-top: 1px solid var(--color-grid-line);
+    transition: background-color 0.15s;
   }
 
   .row:hover {

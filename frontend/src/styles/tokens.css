@@ -1,16 +1,16 @@
-/* docs/9-style-guide.md v0.2 3장. 이름·값은 tokens.test.ts가 문서 표와 대조한다 */
+/* docs/9-style-guide.md v0.4 3장. 이름·값은 tokens.test.ts가 문서 표와 대조한다 */
 :root {
-  /* 3.1 기본 색상 */
+  /* 3.1 기본 색상: 인디고 쪽으로 기운 중립색 */
   --color-bg: #ffffff;
-  --color-surface: #f8f9fa;
-  --color-text: #212529;
-  --color-text-muted: #5c6570;
-  --color-border: #ced4da;
-  --color-grid-line: #e9ecef;
-  --color-primary: #5b4fe9;
-  --color-primary-hover: #4a3dd4;
+  --color-surface: #f5f5f8;
+  --color-text: #17171f;
+  --color-text-muted: #5b5d6b;
+  --color-border: #dcdde5;
+  --color-grid-line: #ecedf2;
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
   --color-primary-text: #ffffff;
-  --color-primary-subtle: #efedfd;
+  --color-primary-subtle: #eeeffd;
   --color-danger: #c62828;
   --color-danger-hover: #a61b1b;
   --color-danger-text: #ffffff;
@@ -19,7 +19,7 @@
   --color-error-border: #e58a8a;
   --color-disabled-bg: #e9ecef;
   --color-disabled-text: #868e96;
-  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-overlay: rgba(17, 17, 31, 0.45);
 
   /* 3.2 상태 색상 */
   --color-status-todo-bg: #f1f3f5;
@@ -40,8 +40,7 @@
   --color-status-overdue-bar: #d32f2f;
 
   /* 3.3 캘린더 색상 */
-  --color-calendar-today-bg: #eef3fa;
-  --color-calendar-today-border: #343a40;
+  --color-calendar-today-bg: #f3f2fe;
   --color-calendar-sunday: #c92a2a;
   --color-calendar-outside: #6c757d;
 
@@ -53,20 +52,26 @@
   --font-size-sm: 0.875rem;
   --font-size-md: 1rem;
   --font-size-lg: 1.25rem;
-  --font-size-xl: 1.5rem;
+  --font-size-xl: 1.75rem;
   --font-weight-normal: 400;
+  --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --font-line-height: 1.5;
+  --font-tracking-tight: -0.02em;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 24px;
   --space-6: 32px;
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --shadow-dialog: 0 8px 24px rgba(0, 0, 0, 0.2);
-  --layout-header-height: 56px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 2px rgba(23, 23, 31, 0.04), 0 8px 24px rgba(23, 23, 31, 0.06);
+  --shadow-dialog: 0 24px 48px rgba(23, 23, 31, 0.18);
+  --shadow-focus: 0 0 0 3px rgba(79, 70, 229, 0.2);
+  --layout-header-height: 64px;
   --layout-max-width: 960px;
   --layout-max-width-wide: 1280px;
 }

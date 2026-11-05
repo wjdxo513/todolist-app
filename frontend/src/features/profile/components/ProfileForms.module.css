@@ -14,14 +14,17 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  border: 1px solid var(--color-grid-line);
+  border-radius: var(--radius-lg);
   background: var(--color-bg);
+  box-shadow: var(--shadow-card);
 }
 
 .heading {
-  font-size: var(--font-size-lg);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-grid-line);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
 }
 

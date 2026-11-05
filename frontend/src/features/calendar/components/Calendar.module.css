@@ -14,9 +14,10 @@
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--color-grid-line);
+  border-radius: var(--radius-lg);
   background: var(--color-bg);
+  box-shadow: var(--shadow-card);
 }
 
 /* 상단 줄: 이동 버튼 / 범위 제목 / 세그먼트(스타일 가이드 4장) */
@@ -44,55 +45,61 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* 세그먼트: 트랙 안에서 선택 항목만 흰 칩으로 떠오른다 */
 .segment {
   grid-area: segment;
   display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-md);
+  background: var(--color-grid-line);
 }
 
 .segmentItem {
   min-width: 44px;
   height: 28px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg);
-  color: var(--color-text);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
 
-.segmentItem + .segmentItem {
-  border-left: 0;
-}
-
-.segmentItem:first-child {
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-}
-
-.segmentItem:last-child {
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+.segmentItem:hover {
+  color: var(--color-text);
 }
 
 .segmentItem[aria-checked='true'] {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  color: var(--color-primary-text);
-  font-weight: var(--font-weight-bold);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: var(--shadow-card);
 }
 
-/* 그리드: 가는 선, 일요일 빨강, 오늘 칸 강조 */
+/* 그리드: 가는 선, 일요일 빨강, 오늘은 채운 원 숫자 */
 .grid {
   border: 1px solid var(--color-grid-line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
 .weekdays {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   border-bottom: 1px solid var(--color-grid-line);
-  font-size: var(--font-size-sm);
+  background: var(--color-surface);
   color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .weekdays span {
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-2);
 }
 
 .sunday {
@@ -102,7 +109,7 @@
 .week {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  grid-template-rows: 24px repeat(3, 24px) 20px;
+  grid-template-rows: 28px repeat(3, 24px) 20px;
   min-height: 64px;
 }
 
@@ -115,7 +122,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1);
   border: 0;
   border-left: 1px solid var(--color-grid-line);
   background: var(--color-bg);
@@ -123,6 +130,7 @@
   font-size: var(--font-size-xs);
   text-align: left;
   cursor: pointer;
+  transition: background-color 0.15s;
 }
 
 .day:first-child {
@@ -133,32 +141,53 @@
   background: var(--color-surface);
 }
 
+.dayNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-pill);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
 .day[data-sunday] .dayNumber {
   color: var(--color-calendar-sunday);
 }
 
 .day[data-outside] .dayNumber {
   color: var(--color-calendar-outside);
+  font-weight: var(--font-weight-normal);
 }
 
+/* 오늘: 연한 칸 배경 + 채운 원 숫자 + (오늘) 표기(색만으로 구분하지 않음) */
 .day[data-today] {
   background: var(--color-calendar-today-bg);
-  box-shadow: inset 0 0 0 1px var(--color-calendar-today-border);
 }
 
 .day[data-today] .dayNumber {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
   font-weight: var(--font-weight-bold);
 }
 
+/* 좁은 칸에서는 화면에서 숨기고 보조기기에는 남긴다 */
 .todayMark {
-  color: var(--color-text-muted);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .barSlot {
   position: relative;
   z-index: 1;
   min-width: 0;
-  padding: 0 1px;
+  padding: 0 2px;
   align-self: center;
 }
 
@@ -169,10 +198,14 @@
   padding: 0 var(--space-2);
   border: 0;
   background: none;
-  color: var(--color-text-muted);
+  color: var(--color-primary);
   font-size: var(--font-size-xs);
-  text-decoration: underline;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
+}
+
+.more:hover {
+  text-decoration: underline;
 }
 
 .dayList {
@@ -186,8 +219,12 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2) var(--space-3);
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-2);
   border-bottom: 1px solid var(--color-grid-line);
+}
+
+.dayItem:last-child {
+  border-bottom: 0;
 }
 
 .dayTitle {
@@ -196,15 +233,21 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--color-primary);
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
   text-align: left;
-  text-decoration: underline;
   cursor: pointer;
   overflow-wrap: anywhere;
 }
 
+.dayTitle:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
 .dayTitle[data-done] {
   color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
   text-decoration: line-through;
 }
 
@@ -215,7 +258,7 @@
 
 @media (min-width: 768px) {
   .card {
-    padding: var(--space-4);
+    padding: var(--space-5);
   }
 
   .toolbar {
@@ -223,21 +266,35 @@
     grid-template-areas: 'nav title segment';
   }
 
+  .rangeTitle {
+    font-size: var(--font-size-xl);
+  }
+
   .segment {
     justify-self: end;
   }
 
   .week {
-    min-height: 96px;
-  }
-
-  .grid[data-view='week'] .week {
-    min-height: 160px;
-    grid-template-rows: 28px repeat(3, 24px) 20px;
+    min-height: 104px;
   }
 
   .day {
-    font-size: var(--font-size-xs);
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .todayMark {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    line-height: 22px;
+    color: var(--color-text-muted);
+  }
+
+  .grid[data-view='week'] .week {
+    min-height: 168px;
+    grid-template-rows: 32px repeat(3, 24px) 20px;
   }
 
   .grid[data-view='week'] .day {
