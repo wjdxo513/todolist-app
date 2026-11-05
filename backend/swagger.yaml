@@ -10,6 +10,7 @@
 # | v0.4 | 2026-11-05 | jtaewu | 확정 | 비밀번호 최대 UTF-8 72바이트 |
 # | v0.5 | 2026-11-05 | jtaewu | 확정 | 구현(BE-17 완료 시점) 동기화: 쿠키 헤더 실제 형식, 정수 상한, 오류 응답 세부, 개발 전용 Swagger UI |
 # | v0.6 | 2026-11-05 | jtaewu | 확정 | servers 설명을 CORS 방식으로 변경(Vite 프록시 삭제, PP-12) |
+# | v0.7 | 2026-11-05 | jtaewu | 확정 | 구현 대조 반영: 본문 파서 오류가 인증보다 먼저인 점, 갱신 쿠키 Max-Age, `fields._` 조건, 기준 문서 버전 |
 #
 # ## 변경 이력
 #
@@ -25,11 +26,15 @@
 # | v0.5 | 2026-11-05 | 머리말·info | 수정 | 결정 목록의 비밀번호 최대 길이·D-10 행을 구현과 맞춤, 공통 규칙(쿼리 알 수 없는 키 무시, 인증 → 검증 순서, 본문 100kb), Swagger UI(`/api/docs`, 개발 전용) 추가 | jtaewu |
 # | v0.5 | 2026-11-05 | paths | 수정 | 로그인 동시 요청 집계 시점, 로그아웃 500 추가, 캘린더·목록 400 세부(`fields.to`, 정수 아닌 `categoryId`·`page`) | jtaewu |
 # | v0.5 | 2026-11-05 | components | 수정 | 쿠키 헤더 예시를 실제 형식(Expires 포함, 만료는 1970-01-01)으로, ID·`categoryId`·`page`에 int4 상한, 검증 오류 예시 문구를 실제 문구로, `fields._`(본문이 객체가 아님), 이름·제목 공백 제거 명시 | jtaewu |
+# | v0.6 | 2026-11-05 | servers | 수정 | 설명을 CORS 방식으로 변경(Vite 프록시 삭제, `FRONTEND_ORIGIN` 쉼표 다중 출처, credentials, PP-12) | jtaewu |
+# | v0.7 | 2026-11-05 | 머리말·info | 수정 | 기준 문서 버전 갱신, D-15 설명 정리, 공통 규칙에 본문 파서 오류(400)가 인증보다 먼저임을 명시, info.version 0.7.0 | jtaewu |
+# | v0.7 | 2026-11-05 | paths | 수정 | 로그아웃 '항상 204'에 본문 파서 오류 예외, 갱신의 새 `refresh_token` 쿠키 Max-Age 재설정 | jtaewu |
+# | v0.7 | 2026-11-05 | components | 수정 | `fields._` 조건에 Content-Type이 JSON이 아닌 경우 추가 | jtaewu |
 #
 # > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다. info.version은 이 표의 최신 버전과 맞춘다.
 #
-# > 본 명세는 `docs/1-domain-definition.md`(v0.3), `docs/2-PRD.md`(v0.6), `docs/3-user-scenario.md`(v0.5), `docs/4-wireframe.md`(v0.4),
-# > `docs/5-project-principle.md`(v0.7), `docs/6-arch-diagram.md`(v0.8), `docs/7-erd.md`(v0.4), `docs/8-plan.md`(v0.12), `docs/schema.sql`을 기준으로 한다.
+# > 본 명세는 `docs/1-domain-definition.md`(v0.4), `docs/2-PRD.md`(v0.7), `docs/3-user-scenario.md`(v0.6), `docs/4-wireframe.md`(v0.5),
+# > `docs/5-project-principle.md`(v0.9), `docs/6-arch-diagram.md`(v0.10), `docs/7-erd.md`(v0.5), `docs/8-plan.md`(v0.15), `docs/schema.sql`을 기준으로 한다.
 # > 규칙·요구사항은 재정의하지 않고 ID(FR/NFR/BR/SN/SP/PP/AD/ER/D 등)로 참조한다.
 #
 # ## 엔드포인트 표
@@ -96,12 +101,12 @@
 # | 기타 | 응답 형태 | 단일 리소스는 래퍼 없이 객체 그대로, 목록은 `{items}`. 갱신(refresh)·비밀번호 변경은 본문 없는 204. 단건·등록·수정 응답에는 `status`를 넣지 않음(today를 받지 않으므로, PP-06은 목록·캘린더만 규정) |
 # | D-15 | 비밀번호 최대 길이 | UTF-8 72바이트(bcrypt가 이후 바이트를 무시하므로). 가입·비밀번호 변경에 적용, 로그인은 상한 없음 |
 #
-# D-11은 이미 해결되어 반영했다. D-12·D-13·D-14·D-15·D-16·D-17은 API 형태에 영향이 없어 반영 대상이 아니다. D-15의 길이 값은 schema.sql 기준을 썼다.
+# D-11은 이미 해결되어 반영했다. D-15는 비밀번호 길이가 API에 영향이 있어 위 표에 넣었다(길이 값은 schema.sql 기준). D-12·D-13·D-14·D-16·D-17은 API 형태에 영향이 없어 반영 대상이 아니다.
 
 openapi: 3.0.3
 info:
   title: TodoList API
-  version: 0.5.0
+  version: 0.7.0
   description: |
     인증된 사용자가 할일을 카테고리·기간(시작일~종료일)으로 관리하고 월/주/일 캘린더로 조회하는 TodoList 백엔드 API.
     버전 이력은 파일 상단 주석 참조.
@@ -111,7 +116,7 @@ info:
     - 날짜는 `YYYY-MM-DD` 문자열(시간·시간대 없음), 시각은 ISO 8601(UTC). 달력상 유효하지 않은 날짜(`2026-02-30`)는 400.
     - 요청 본문·쿼리의 알 수 없는 필드(`id`, `userId`, `isDefault`, `email` 등)는 무시한다(LP-05).
     - 타인 소유 리소스 ID는 없는 ID와 같은 404 `NOT_FOUND`다(NFR-06, NP-16).
-    - 보호 API는 인증 → 경로 ID → 본문·쿼리 검증 순서다(D-10). 미인증이면 입력이 잘못돼도 401이다.
+    - 보호 API는 인증 → 경로 ID → 본문·쿼리 검증 순서다(D-10). 미인증이면 본문·쿼리 값이 잘못돼도 401이다. 단, JSON 파싱 오류·본문 크기 초과(100kb)·지원하지 않는 charset 등 본문 파서 오류는 모든 경로에서 인증보다 먼저 400 `VALIDATION_ERROR`(fields 없음)다.
     - 요청 본문은 `application/json`, 최대 100kb다.
     - 응답 어디에도 비밀번호·비밀번호 해시·토큰 값이 없다.
 
@@ -298,6 +303,7 @@ paths:
         성공하면 새 `access_token`·`refresh_token` 쿠키를 설정한다.
         쿠키가 없거나 임의 값·만료·이미 사용된(갱신·로그아웃으로 삭제된) 토큰이면 401 `UNAUTHENTICATED`이며 두 쿠키를 만료시킨다. 재사용 탐지(계열 폐기)는 하지 않는다.
         같은 토큰으로 동시에 두 번 호출하면 한쪽만 성공한다. 성공 응답은 본문 없는 204.
+        단, 새 `refresh_token` 쿠키의 `Max-Age`는 매번 604800(7일)으로 다시 설정되므로 브라우저 쿠키가 서버 만료보다 오래 남을 수 있다(서버 만료 후 갱신은 401).
         근거: FR-02, PA-01, SP-03, SN-03, SN-15, ER-13~ER-15, LP-08, AD-17.
       security:
         - refreshTokenCookie: []
@@ -330,7 +336,7 @@ paths:
       summary: 로그아웃
       description: |
         인증 미들웨어 없이 `refresh_token` 쿠키만 사용한다(Access Token이 만료된 뒤에도 폐기된다). 쿠키의 해시와 일치하는 행만 삭제하므로 다른 기기 세션은 유지된다(SA-10).
-        쿠키가 없거나 일치하는 행이 없어도 204이며, 두 쿠키를 발급 때와 같은 속성으로 만료시킨다. DB 오류일 때만 500이다. 요청 본문 없음.
+        쿠키가 없거나 일치하는 행이 없어도 204이며, 두 쿠키를 발급 때와 같은 속성으로 만료시킨다. DB 오류일 때만 500이다. 요청 본문 없음(본문 파서 오류는 공통 규칙대로 400).
         근거: FR-11, SN-04, SA-05, D-11(해결), SP-03.
       security:
         - refreshTokenCookie: []
@@ -1058,7 +1064,7 @@ components:
               description: 사용자에게 보여도 되는 문구.
             fields:
               type: object
-              description: 필드명 → 문구. 입력 오류(400)와 필드가 특정되는 409에만 붙는다. 본문 자체가 객체가 아니면(배열 등) 키는 `_`다.
+              description: 필드명 → 문구. 입력 오류(400)와 필드가 특정되는 409에만 붙는다. 본문 자체가 객체가 아니면(배열, 또는 Content-Type이 application/json이 아니어서 본문이 없는 경우 등) 키는 `_`다.
               additionalProperties:
                 type: string
 

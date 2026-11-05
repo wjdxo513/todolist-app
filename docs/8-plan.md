@@ -18,6 +18,7 @@
 | v0.12 | 2026-11-05 | jtaewu | 초안 | 코드 검토 반영: D-15 비밀번호 최대 UTF-8 72바이트 |
 | v0.13 | 2026-11-05 | jtaewu | 초안 | 개발·운영 CORS 방식 반영(5번 v0.8 PP-12, 6번 v0.9) |
 | v0.14 | 2026-11-05 | jtaewu | 초안 | FE-01~FE-17 완료(프론트엔드 Task 전부), D-03·D-13·D-17 해결, D-14 FE 항목 해결 |
+| v0.15 | 2026-11-05 | jtaewu | 초안 | 기준 문서 버전 갱신(1번 v0.4, 2번 v0.7, 3번 v0.6, 4번 v0.5, 5번 v0.9, 6번 v0.10, 7번 v0.5, 9번 v0.3) |
 
 ## 변경 이력
 
@@ -60,10 +61,11 @@
 | v0.13 | 2026-11-05 | 6·9장 | 수정 | FE-01 `vite.config.ts` 프록시 삭제·`VITE_API_BASE_URL` 절대 URL, INT-02 선행·D-12 문구를 CORS 구성으로 변경 | jtaewu |
 | v0.14 | 2026-11-05 | 7장 | 수정 | FE-01~FE-17 완료 조건 체크(테스트 33파일·245건 통과, 커버리지 lines 99.7%·branches 98.6%·functions 100%·statements 100%) | jtaewu |
 | v0.14 | 2026-11-05 | 9장 | 수정 | D-03(네이티브 date input), D-13(첫 화면 월 뷰), D-17(탭 단위 single-flight 한계 수용) 해결, D-14의 WA-03·18·23·24 확정, D-15 FE limits 해결 | jtaewu |
+| v0.15 | 2026-11-05 | 머리말 | 수정 | 기준 문서 버전 갱신(1번 v0.4, 2번 v0.7, 3번 v0.6, 4번 v0.5, 5번 v0.9, 6번 v0.10, 7번 v0.5, 9번 v0.3. 구현 대조로 문서를 코드에 맞춤) | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.6), `3-user-scenario.md`(v0.5), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.8), `6-arch-diagram.md`(v0.9), `7-erd.md`(v0.4), `schema.sql`을 기준으로 한다. 규칙·요구사항·화면은 재정의하지 않고 ID(FR/NFR/BR/SN/E2E/ST/CV/WA/TP/SP/ER/AD/PP 등)로 참조한다.
+> 본 문서는 `1-domain-definition.md`(v0.4), `2-PRD.md`(v0.7), `3-user-scenario.md`(v0.6), `4-wireframe.md`(v0.5), `5-project-principle.md`(v0.9), `6-arch-diagram.md`(v0.10), `7-erd.md`(v0.5), `9-style-guide.md`(v0.3), `schema.sql`을 기준으로 한다. 규칙·요구사항·화면은 재정의하지 않고 ID(FR/NFR/BR/SN/E2E/ST/CV/WA/TP/SP/ER/AD/PP 등)로 참조한다.
 
 ## 1. 개요와 Task 표기 규칙
 

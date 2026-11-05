@@ -6,6 +6,7 @@
 |------|------|--------|------|------|
 | v0.1 | 2026-11-04 | jtaewu | 초안 | 최초 작성 (8번 문서 PRE-01) |
 | v0.2 | 2026-11-05 | jtaewu | 초안 | 참고 캘린더 화면(이미지) 검토 반영: 보라 주 색상, 캘린더·헤더·세그먼트 버튼 규칙, 조밀한 크기 체계 |
+| v0.3 | 2026-11-05 | jtaewu | 초안 | 프론트 구현(FE-01~17) 대조 반영: 주 색상 사용처, 안내 배너·작은 버튼·일 뷰 목록 규칙 추가, 캘린더·헤더·입력 세부 규칙과 리터럴 값 정리 |
 
 ## 변경 이력
 
@@ -19,10 +20,16 @@
 | v0.2 | 2026-11-05 | 4장 | 추가 | 공통 헤더·내비, 강조 보조 버튼, 세그먼트 버튼(월/주/일), 캘린더 그리드·날짜 칸·이동 버튼 규칙 | jtaewu |
 | v0.2 | 2026-11-05 | 6장 | 삭제 | PP-15 갱신 제안(5번 v0.6에 반영 완료). 가정 표를 7장 → 6장으로 이동 | jtaewu |
 | v0.2 | 2026-11-05 | 6장 | 추가 | SG-10~SG-15, SG-02·03·04·06 수정 | jtaewu |
+| v0.3 | 2026-11-05 | 머리말 | 수정 | 기준 문서 버전 갱신(4번 v0.5, 5번 v0.9, 8번 v0.15) | jtaewu |
+| v0.3 | 2026-11-05 | 1.1 | 수정 | 주 색상 사용처를 구현 기준으로 확대(강조 보조 버튼·링크·포커스·안내 배너 등) | jtaewu |
+| v0.3 | 2026-11-05 | 4장 | 추가 | 작은 버튼, 안내 배너, 일 뷰 목록 규칙 | jtaewu |
+| v0.3 | 2026-11-05 | 4장 | 수정 | 주 버튼 예외, 입력(라벨·포커스·읽기 전용·힌트), 헤더·내비 배치, 세그먼트 마크업·크기, 이동 버튼(정사각 → 작은 버튼), 캘린더 상단 줄 모바일 배치, 그리드(주 뷰 높이·요일 표기), 날짜 칸 `(오늘)`, 막대 좌우 1px, 오류 배너 글자, 표 대상에서 일 뷰 제외 | jtaewu |
+| v0.3 | 2026-11-05 | 5장 | 수정 | 360px 월 뷰 칸 폭 약 48px → 약 43px, JS 모바일 판정 예외 명시 | jtaewu |
+| v0.3 | 2026-11-05 | 6장 | 수정 | SG-06에 한 곳에서만 쓰는 리터럴 값 추가 | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.8), `8-plan.md`(v0.13)를 기준으로 한다. 화면 구성·상태 판정 규칙은 재정의하지 않고 해당 문서를 참조한다. v0.2는 사용자가 제공한 웹 캘린더 서비스의 월간 화면 캡처(2026-11-05)를 시각 참고로 삼았으며, 해당 서비스의 로고·명칭·아이콘은 쓰지 않는다.
+> 본 문서는 `1-domain-definition.md`(v0.4), `4-wireframe.md`(v0.5), `5-project-principle.md`(v0.9), `8-plan.md`(v0.15)를 기준으로 한다. 화면 구성·상태 판정 규칙은 재정의하지 않고 해당 문서를 참조한다. v0.2는 사용자가 제공한 웹 캘린더 서비스의 월간 화면 캡처(2026-11-05)를 시각 참고로 삼았으며, 해당 서비스의 로고·명칭·아이콘은 쓰지 않는다.
 
 ## 1. 개요
 
@@ -39,7 +46,7 @@
 | 참고 화면의 특징 | 이 앱에 적용 | 적용하지 않음 (이유) |
 |------------------|--------------|----------------------|
 | 흰 배경 + 가는 회색 선으로 나뉜 조밀한 업무형 화면 | 페이지·카드 흰 배경, 그리드 선 `--color-grid-line`, 작은 글자(12~14px) 위주 | - |
-| 보라 계열 단일 강조색(주 버튼, 선택된 보기 전환, 현재 메뉴) | `--color-primary` 보라. 주 버튼·세그먼트 선택·현재 메뉴·현재 페이지에만 사용 | 상태 색으로는 쓰지 않는다(상태와 혼동 방지) |
+| 보라 계열 단일 강조색(주 버튼, 선택된 보기 전환, 현재 메뉴) | `--color-primary` 보라. 주 버튼·강조 보조 버튼·세그먼트 선택·현재 메뉴·현재 페이지·링크·키보드 포커스·입력 포커스 테두리·안내 배너 테두리에 사용 | 상태 색으로는 쓰지 않는다(상태와 혼동 방지) |
 | 이어 붙은 `일간/주간/월간` 버튼, 선택 항목만 채움 | 월/주/일 전환을 세그먼트 버튼으로(4장) | - |
 | 날짜를 가로질러 이어지는 사각형 일정 막대 | 캘린더 막대를 블록형(20px, 모서리 2px)으로 | 단일 주황 채움(색만으로 구분, WA-19 위반) → 상태별 연한 배경 + 선 모양 |
 | 오늘 칸: 진한 테두리 + 연한 푸른 배경 | `--color-calendar-today-*` | - |
@@ -157,24 +164,27 @@
 | 대상 | 규칙 |
 |------|------|
 | 버튼 공통 | 안쪽 여백 `--space-2` `--space-4`, 모서리 `--radius-md`, 굵기 `--font-weight-bold`. 비활성은 `--color-disabled-bg`/`--color-disabled-text`, hover 효과 없음. 키보드 포커스는 `outline: 2px solid var(--color-primary)`, `outline-offset: 2px` |
-| 주 버튼 | 배경 `--color-primary`, 글자 `--color-primary-text`, hover `--color-primary-hover`. 화면당 1개(예: `[ + 새 할일 ]`, `[ 저장 ]`) |
+| 주 버튼 | 배경 `--color-primary`, 글자 `--color-primary-text`, hover `--color-primary-hover`. 화면당 1개가 원칙(예: `[ + 새 할일 ]`, `[ 저장 ]`). 같은 동작의 반복(SC-05 빈 상태의 `[ + 새 할일 ]`)과 인라인 편집 행의 `[ 저장 ]`(SC-04)은 예외 |
+| 작은 버튼 | 버튼 공통에 높이 최소 28px, 안쪽 여백 0 `--space-3`, 글자 `--font-size-sm`, 모서리 `--radius-sm`. 변형(보조·주)은 그대로 적용. 헤더 `[ 로그아웃 ]`, 표 행 작업 버튼(편집·삭제·수정·저장·취소), 페이지네이션, 캘린더 이동 버튼에 사용 |
 | 보조 버튼 | 배경 `--color-bg`, 글자 `--color-text`, 테두리 1px `--color-border`. 취소·편집 등에 사용 |
 | 강조 보조 버튼 | 배경 `--color-bg`, 글자 `--color-primary`, 테두리 1px `--color-primary`, hover 배경 `--color-primary-subtle`. 주 버튼 옆 두 번째 동작(예: 비밀번호 변경) |
 | 위험 버튼 | 배경 `--color-danger`, 글자 `--color-danger-text`, hover `--color-danger-hover`. 삭제 확인에만 사용 |
-| 입력(기본) | 배경 `--color-bg`, 테두리 1px `--color-border`, 모서리 `--radius-md`, 안쪽 여백 `--space-2` `--space-3`. 라벨은 입력 위, `--space-1` 간격. 포커스 시 테두리 `--color-primary` |
-| 입력(오류) | 테두리를 `--color-error-border`로 바꾸고, 바로 아래에 `--font-size-sm`·`--color-error-text`로 `[!]` 접두 문구(4번 문서 5.4). 입력값은 지우지 않는다 |
+| 입력(기본) | 배경 `--color-bg`, 테두리 1px `--color-border`, 모서리 `--radius-md`, 안쪽 여백 `--space-2` `--space-3`. 라벨은 데스크톱·모바일 모두 입력 위, `--space-1` 간격, 글자 `--font-size-sm` 굵게. 텍스트 입력은 포커스 시 테두리 `--color-primary` + 키보드 포커스 `outline: 2px solid var(--color-primary)`, `outline-offset: 1px`. 드롭다운(`select`)은 테두리 변화 없이 공통 키보드 포커스(offset 2px)만 적용하며, SC-05 필터 드롭다운은 안쪽 여백 `--space-1` `--space-3`. 읽기 전용은 배경 `--color-surface`, 글자 `--color-text-muted`. 힌트·글자 수 카운터는 입력 아래 `--font-size-sm`·`--color-text-muted`, 접두 없음 |
+| 입력(오류) | 테두리를 `--color-error-border`로 바꾸고, 입력 아래(힌트·카운터가 있으면 그 아래)에 `--font-size-sm`·`--color-error-text`로 `[!]` 접두 문구(4번 문서 5.4). 입력값은 지우지 않는다 |
 | 배지 | `( ) 시작 전` 등 라벨 포함. 상태별 `--color-status-*-bg/-text/-border`, 테두리 1px, 모서리 `--radius-sm`, 안쪽 여백 `--space-1` `--space-2`, 글자 `--font-size-sm` |
-| 공통 헤더 | 높이 `--layout-header-height`, 배경 `--color-bg`, 아래 1px `--color-grid-line`. 왼쪽 앱 이름(`--font-size-lg` 굵게), 가운데 내비, 오른쪽 사용자 이름(`--color-text-muted`, `--font-size-sm`)과 `[ 로그아웃 ]`(보조 버튼). 헤더 오류 영역은 헤더 바로 아래 오류 배너 |
-| 내비 항목 | 글자 `--font-size-sm`, 안쪽 여백 `--space-2` `--space-3`, hover 배경 `--color-primary-subtle`. 현재 항목은 글자 `--color-primary`·굵게 + 아래 2px `--color-primary` 선(색만으로 구분하지 않도록 선을 함께 쓴다), `aria-current="page"` |
-| 세그먼트 버튼 (월/주/일, SC-05 상태 필터 데스크톱) | 항목을 간격 없이 이어 붙이고 바깥 테두리 1px `--color-border`, 항목 사이 1px `--color-border`, 양끝 모서리 `--radius-sm`. 항목: 배경 `--color-bg`, 글자 `--color-text`·`--font-size-sm`, 안쪽 여백 `--space-1` `--space-3`. 선택 항목: 배경 `--color-primary`, 글자 `--color-primary-text`, 굵게. 마크업은 라디오 그룹(`role="radiogroup"`/`aria-checked`)으로 두어 와이어프레임의 단일 선택 라디오 의미를 유지한다 |
-| 이동 버튼 (`<` `>` `오늘`) | 보조 버튼 모양을 작게: 높이 28px, `<` `>`는 정사각 28px, 글자 `--font-size-sm`, 모서리 `--radius-sm`. `<` `>`는 `aria-label`("이전 달" 등)을 단다 |
-| 캘린더 상단 줄 | 왼쪽 이동 버튼 묶음, 가운데 범위 제목(`--font-size-lg` 굵게), 오른쪽 세그먼트 버튼. 줄 아래 `--space-4` 간격 |
-| 캘린더 그리드 (월·주 뷰) | 바깥과 칸 사이 선 1px `--color-grid-line`, 칸 배경 `--color-bg`. 요일 머리글은 `--font-size-sm`·`--color-text-muted`, 일요일은 `--color-calendar-sunday`. 월 뷰 칸 최소 높이 96px(모바일 64px), 주 뷰는 높이 고정 없음 |
-| 날짜 칸 | 날짜 숫자는 칸 왼쪽 위, `--font-size-xs`, 안쪽 여백 `--space-1` `--space-2`. 일요일 숫자 `--color-calendar-sunday`, 이번 달 밖 숫자 `--color-calendar-outside`. 오늘 칸은 배경 `--color-calendar-today-bg` + 테두리 1px `--color-calendar-today-border` + 숫자 굵게(색만으로 구분하지 않음). hover 시 배경 `--color-surface`, 클릭 가능함을 `cursor: pointer`로 표시 |
-| 캘린더 막대 | 2장 블록형 규칙. 막대는 날짜 칸 경계를 넘어 이어 그리고(칸 사이 여백 없음), 막대 사이 세로 간격 `--space-1`. 안쪽 여백 0 `--space-1`, 글자 `--font-size-xs`, 한 줄 말줄임(`text-overflow: ellipsis`). 모양 기호를 제목 앞에 표기. 범위 밖으로 이어지면 해당 끝에 `<` `>` 표시하고 그쪽 모서리는 0. `[+N건]`은 막대 아래 `--font-size-xs`·`--color-text-muted` 링크 |
-| 다이얼로그 | 뒷배경 `--color-overlay`, 본체 `--color-bg`, 모서리 `--radius-md`, 그림자 `--shadow-dialog`, 안쪽 여백 `--space-5`, 제목 `--font-size-lg` 굵게, 버튼은 오른쪽 정렬 `취소`(보조)·`삭제`(위험), 간격 `--space-2`. 폭 최대 `420px`, 모바일은 좌우 `--space-4` 여백 |
-| 오류 배너 | 배경 `--color-error-bg`, 글자 `--color-error-text`, 테두리 1px `--color-error-border`, 모서리 `--radius-md`, 안쪽 여백 `--space-3` `--space-4`. 메시지가 있을 때만 표시 |
-| 표 (SC-05 목록, 일 뷰) | 머리글 배경 `--color-surface`, 글자 `--font-size-sm`·굵게. 행 구분선 1px `--color-grid-line`, 행 안쪽 여백 `--space-2` `--space-3`, 행 hover 배경 `--color-surface` |
+| 공통 헤더 | 높이 `--layout-header-height`, 배경 `--color-bg`, 아래 1px `--color-grid-line`, 좌우 여백 `--space-6`(모바일 `--space-4`). 왼쪽 앱 이름(`--font-size-lg` 굵게)과 그 오른쪽 내비, 오른쪽 끝 사용자 이름(`--color-text-muted`, `--font-size-sm`)과 `[ 로그아웃 ]`(작은 보조 버튼). 모바일은 `[=]`(테두리 1px `--color-border`, 모서리 `--radius-sm`, 안쪽 여백 `--space-1` `--space-2`, `--font-size-sm`)·앱 이름·로그아웃. 헤더 오류 영역은 헤더 바로 아래 오류 배너 |
+| 내비 항목 | 글자 `--font-size-sm`, hover 배경 `--color-primary-subtle`. 데스크톱은 헤더 높이를 채우고 좌우 여백 `--space-3`, 현재 항목은 글자 `--color-primary`·굵게 + 아래 2px `--color-primary` 선(색만으로 구분하지 않도록 선을 함께 쓴다). 모바일 세로 메뉴는 안쪽 여백 `--space-3` `--space-4`, 현재 항목은 왼쪽 2px `--color-primary` 선. `aria-current="page"` |
+| 세그먼트 버튼 (월/주/일, SC-05 상태 필터 데스크톱) | 항목을 간격 없이 이어 붙이고 바깥 테두리 1px `--color-border`, 항목 사이 1px `--color-border`, 양끝 모서리 `--radius-sm`. 항목: 배경 `--color-bg`, 글자 `--color-text`·`--font-size-sm`. 선택 항목: 배경·테두리 `--color-primary`, 글자 `--color-primary-text`, 굵게. 크기는 SC-05 상태 필터가 안쪽 여백 `--space-1` `--space-3`, 캘린더 보기 전환이 높이 28px·최소 폭 44px(안쪽 여백은 브라우저 기본). 마크업은 라디오 그룹(캘린더: `role="radiogroup"`/`aria-checked`, SC-05: `fieldset`·`legend` + 화면에서 숨긴 네이티브 radio)으로 두어 와이어프레임의 단일 선택 라디오 의미를 유지한다 |
+| 이동 버튼 (`<` `>` `오늘`) | 작은 보조 버튼(높이 최소 28px, 좌우 여백 `--space-3`이라 `<` `>`도 정사각이 아님). 묶음 안 간격 `--space-1`. `<` `>`는 `aria-label`("이전 달"·"다음 주"·"이전 날" 등 뷰 단위)을 단다 |
+| 캘린더 상단 줄 | 데스크톱: 왼쪽 이동 버튼 묶음, 가운데 범위 제목(`--font-size-lg` 굵게), 오른쪽 세그먼트 버튼. 모바일: 1행에 이동 버튼 묶음(왼쪽)과 세그먼트 버튼(오른쪽), 2행에 범위 제목(가운데). 줄 아래 `--space-4` 간격. 상단 줄과 그리드는 카드(안쪽 여백 `--space-4`, 모바일 `--space-3`) 안에 둔다 |
+| 캘린더 그리드 (월·주 뷰) | 바깥과 칸 사이 선 1px `--color-grid-line`, 칸 배경 `--color-bg`. 월 뷰 요일 머리글 줄은 `--font-size-sm`·`--color-text-muted`, 일요일은 `--color-calendar-sunday`. 주 뷰는 요일 머리글 줄 없이 날짜 칸에 `일 11/01` 형식으로 표기(데스크톱 `--font-size-sm`). 막대 줄은 날짜 칸 표기 줄(24px, 주 뷰 데스크톱 28px) + 막대 3줄(각 24px) + `[+N건]` 줄(20px)로 고정. 칸 최소 높이는 월 뷰 96px(모바일 64px), 주 뷰 데스크톱 160px(모바일 64px) |
+| 날짜 칸 | 날짜 숫자는 칸 왼쪽 위, `--font-size-xs`, 안쪽 여백 `--space-1` `--space-2`. 일요일 숫자 `--color-calendar-sunday`, 이번 달 밖 숫자 `--color-calendar-outside`. 오늘 칸은 배경 `--color-calendar-today-bg` + 테두리 1px `--color-calendar-today-border` + 숫자 굵게 + 숫자 뒤 `(오늘)`(`--color-text-muted`, 데스크톱·모바일 공통)으로 색만으로 구분하지 않는다. hover 시 배경 `--color-surface`, 클릭 가능함을 `cursor: pointer`로 표시 |
+| 캘린더 막대 | 2장 블록형 규칙. 막대는 날짜 칸 경계를 넘어 이어 그리고(막대 칸 좌우 1px 여백), 막대 사이 세로 간격 `--space-1`. 안쪽 여백 0 `--space-1`, 글자 `--font-size-xs`, 한 줄 말줄임(`text-overflow: ellipsis`). 모양 기호를 제목 앞에 표기. 범위 밖으로 이어지면 해당 끝에 `<` `>` 표시하고 그쪽 모서리는 0. `[+N건]`은 막대 아래 `--font-size-xs`·`--color-text-muted` 링크 |
+| 다이얼로그 | 뒷배경 `--color-overlay`, 본체 `--color-bg`, 모서리 `--radius-md`, 그림자 `--shadow-dialog`, 안쪽 여백 `--space-5`, 제목 `--font-size-lg` 굵게, 버튼은 오른쪽 정렬 `취소`(보조)·`삭제`(위험), 간격 `--space-2`. 폭 최대 `420px`, 모바일은 좌우 `--space-4` 여백. 열리면 `취소`에 먼저 포커스, Esc는 취소와 같다 |
+| 오류 배너 | 배경 `--color-error-bg`, 글자 `--color-error-text`·`--font-size-sm`, 테두리 1px `--color-error-border`, 모서리 `--radius-md`, 안쪽 여백 `--space-3` `--space-4`, `[!]` 접두. 메시지가 있을 때만 표시 |
+| 안내 배너 | 오류 배너와 같은 여백·모서리·글자 크기. 배경 `--color-primary-subtle`, 글자 `--color-text`, 테두리 1px `--color-primary`, `(i)` 접두, `role="status"`. 메시지가 있을 때만 표시(SC-02 가입 완료·세션 만료, SC-03 저장 완료) |
+| 표 (SC-05 목록) | 머리글 배경 `--color-surface`, 글자 `--font-size-sm`·굵게. 행 구분선 1px `--color-grid-line`, 행 안쪽 여백 `--space-2` `--space-3`, 행 hover 배경 `--color-surface` |
+| 일 뷰 목록 (SC-07) | 머리글 없는 목록. 항목마다 상태 배지·제목 링크(`--color-primary`, 밑줄, 완료는 취소선 + `--color-text-muted`)·카테고리·기간(`--font-size-sm`·`--color-text-muted`)을 한 줄에 두고 좁으면 줄바꿈. 항목 아래 1px `--color-grid-line`, 안쪽 여백 `--space-3` |
 | 페이지네이션 | 번호·이전·다음은 보조 버튼 모양. 현재 페이지는 `--color-primary` 배경·`--color-primary-text`·굵게. 첫·마지막에서 이전·다음은 비활성 스타일. 모바일은 `현재 / 전체` 텍스트 |
 | 빈 상태·찾을 수 없음 | 가운데 정렬, 문구 `--color-text-muted`, 부가 버튼과 `--space-4` 간격. 찾을 수 없음 제목은 `--font-size-lg` 굵게 |
 | 페이지·본문 | 페이지 배경 `--color-surface`, 본문 `max-width: var(--layout-max-width)`(캘린더는 `--layout-max-width-wide`) 가운데 정렬, 바깥 여백 `--space-6`(모바일 `--space-4`). 카드는 `--color-bg`, 테두리 1px `--color-border`, `--radius-md` |
@@ -187,7 +197,9 @@
 @media (min-width: 768px) { /* 데스크톱 규칙 */ }
 ```
 
-최소 폭 360px에서 가로 스크롤이 생기지 않아야 한다. 구간별 레이아웃 변화는 4번 문서 6장을 따른다. 360px 월 뷰에서 날짜 칸은 약 48px이므로 막대는 제목 없이 모양·선 모양만 표시한다(2장).
+JS에서 모바일 여부를 판정할 때(캘린더 막대 제목 생략·탭 동작)는 같은 경계를 `(max-width: 767px)`로 쓴다. 이 통일 규칙은 CSS에만 적용한다.
+
+최소 폭 360px에서 가로 스크롤이 생기지 않아야 한다. 구간별 레이아웃 변화는 4번 문서 6장을 따른다. 360px 월 뷰에서 날짜 칸은 약 43px((360 − 본문 여백 32 − 캘린더 카드 여백 24 − 그리드 테두리 2) ÷ 7)이므로 막대는 제목 없이 모양·선 모양만 표시한다(2장).
 
 ## 6. 가정
 
@@ -198,7 +210,7 @@
 | SG-03 | 글꼴은 시스템 글꼴 스택, 크기 5단계(12/14/16/20/24px), 굵기 2단계(400/700), 행간 1.5 |
 | SG-04 | 간격은 4/8/12/16/24/32px 6단계, 모서리는 2/4px 2단계(SG-12) |
 | SG-05 | 그림자는 다이얼로그·팝업용 1개만 둔다 |
-| SG-06 | 본문 최대 폭 960px, 캘린더 1280px(변수). 다이얼로그 최대 폭 420px, 이동 버튼 28px, 월 뷰 칸 최소 높이 96/64px은 한 곳에서만 쓰여 변수화하지 않음 |
+| SG-06 | 본문 최대 폭 960px, 캘린더 1280px(변수). 다이얼로그 최대 폭 420px, 작은 버튼 높이 28px, 월 뷰 칸 최소 높이 96/64px, 인증 카드 최대 폭 420px, 할일 폼 640px, 내 정보 560px, 목록 열 폭(48/140/120/136px), 완료 체크박스 18px, 라벨 높이 맞춤 여백 26px(SC-04), 캘린더 줄 높이 24/28/20px·주 뷰 칸 최소 높이 160px·세그먼트 최소 폭 44px은 한 곳에서만 쓰여 변수화하지 않음 |
 | SG-07 | 막대 선 두께는 점선·실선·물결 2px, 굵은 선(기한 초과) 4px |
 | SG-08 | 완료 변형은 제목 취소선 + `--color-text-muted`이며 배지에는 취소선을 쓰지 않는다 |
 | SG-09 | 반응형은 `min-width: 768px` 한 가지 방식으로 통일한다(경계는 WA-23 가정 그대로) |

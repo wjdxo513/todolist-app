@@ -13,6 +13,7 @@
 | v0.7 | 2026-11-04 | jtaewu | 초안 | AD-12·AD-14 해결(8번 문서 D-10) |
 | v0.8 | 2026-11-04 | jtaewu | 초안 | AD-05·AD-16 해결(8번 문서 D-07·D-16) |
 | v0.9 | 2026-11-05 | jtaewu | 초안 | 개발·운영 CORS 방식 반영(5번 v0.8 PP-12) |
+| v0.10 | 2026-11-05 | jtaewu | 초안 | 프론트 구현(FE-01~17) 반영: 3.1 lib 모듈, 6.3 me 조회·로그아웃 처리, AD-17 해결. 코드 대조 반영: 미들웨어 체인·레이어 간선, 6.1~6.9 시퀀스 세부, AD-09·12·15 |
 
 ## 변경 이력
 
@@ -39,10 +40,22 @@
 | v0.9 | 2026-11-05 | 머리말 | 수정 | 기준 문서 버전 갱신(5번 v0.8) | jtaewu |
 | v0.9 | 2026-11-05 | 2장 | 수정 | 같은 출처 진입점·Vite 프록시 삭제, 프론트·API 다른 출처 CORS 연결로 구성도·표 변경 | jtaewu |
 | v0.9 | 2026-11-05 | 8장 | 수정 | AD-02 문구를 CORS 구성에 맞게 정리 | jtaewu |
+| v0.10 | 2026-11-05 | 머리말 | 수정 | 기준 문서 버전 갱신(4번 v0.5, 5번 v0.9) | jtaewu |
+| v0.10 | 2026-11-05 | 3장 | 수정 | 3.1 lib에 routes·messages·queryKeys 추가 | jtaewu |
+| v0.10 | 2026-11-05 | 6장 | 수정 | 6.3 C: me 조회는 401을 null로 받아 RequireAuth가 이동, D: 로그아웃 후 me를 null로 두어 로그인 화면이 갱신 요청을 하지 않음 | jtaewu |
+| v0.10 | 2026-11-05 | 8장 | 수정 | AD-17 해결(탭 단위 single-flight 한계 수용, 8번 문서 D-17) | jtaewu |
+| v0.10 | 2026-11-05 | 머리말, 5장 | 수정 | 기준 문서 버전 갱신(도메인 v0.4, PRD v0.7, 시나리오 v0.6, ERD v0.5) | jtaewu |
+| v0.10 | 2026-11-05 | 1장 | 수정 | 시퀀스 표기: 요청 경로는 `backend/swagger.yaml`을 따른다(AD-01 해결 반영) | jtaewu |
+| v0.10 | 2026-11-05 | 2장 | 수정 | 개발 환경 전용 `/api/docs`(Swagger UI)를 구성도·표에 추가 | jtaewu |
+| v0.10 | 2026-11-05 | 3장 | 수정 | 3.1 기능 간 import(todos·calendar → categories, todos·profile → auth), categories → stores, app → api·lib·components 간선 추가 | jtaewu |
+| v0.10 | 2026-11-05 | 4장 | 수정 | 4.1 `app.js` 실제 등록 순서, 갱신·로그아웃 validate 없음, 경로 ID 오류 404, 미등록 경로 404, 헬스 503, body-parser 오류 400, `requireAuth` 이름. 4.2 controller → lib, db → lib 간선, `pgError`, AD-14 해결 문구 | jtaewu |
+| v0.10 | 2026-11-05 | 6장 | 수정 | 코드 대조: 6.1 검증 규칙·409 code, 6.2 실패 선집계·발급 순서·AD-05/16 결과, 6.3 D 서비스 호출 위치, 6.4 카테고리 필터 소유 확인·건수 병렬, 6.5 수정 사전 조회 삭제·FK 23503 404, 6.6 SQL·`DEFAULT_CATEGORY_PROTECTED`·`CATEGORY_IN_USE`, 6.7 경로·42일·정렬·`overlapCondition`, 6.8 경로·400·204·PP-23, 6.9 쿠키 없음 처리 위치·토큰 생성 시점·0행 COMMIT·204·시계 메모 | jtaewu |
+| v0.10 | 2026-11-05 | 7장 | 수정 | `user_id` 조건 예외에 `token_hash` 조회 추가, 로그인 정리·INSERT 트랜잭션 없음 확정 | jtaewu |
+| v0.10 | 2026-11-05 | 8장 | 수정 | AD-09(23503 응답 코드), AD-12(실제 등록 순서) 보완, AD-15 해결 | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.6), `3-user-scenario.md`(v0.5), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.8)를 기준으로 한다. 데이터 모델은 `7-erd.md`(v0.4)를 따른다. 아키텍처는 5번 문서와 일치해야 하며, 충돌하면 5번이 우선한다.
+> 본 문서는 `1-domain-definition.md`(v0.4), `2-PRD.md`(v0.7), `3-user-scenario.md`(v0.6), `4-wireframe.md`(v0.5), `5-project-principle.md`(v0.9)를 기준으로 한다. 데이터 모델은 `7-erd.md`(v0.5)를 따른다. 아키텍처는 5번 문서와 일치해야 하며, 충돌하면 5번이 우선한다.
 
 ## 1. 개요
 
@@ -58,7 +71,7 @@
 | 5 | 데이터 모델 요점 (ERD는 `7-erd.md`) | 표 |
 | 6 | 비즈니스 로직 시퀀스 6.1~6.9 | sequenceDiagram |
 
-**시퀀스 표기:** 참여자 약어는 사용자(U), 화면(UI), 상태 저장소(ST, Zustand), TanStack Query와 api(Q), Express 미들웨어(MW), controller(C), service(S), domain(D), repository(R), PostgreSQL(DB)이다. `MW`는 `cors`, `cookie-parser`, `auth`, `validate`, `errorHandler`를 묶어 표현한다. 오류 응답은 모두 NP-15 형식이며 `errorHandler`가 변환한다(LP-04). 요청 경로는 API 명세 전이라 동작 이름으로 적고, 5번 문서 NP-13에 예시로 나온 `/api/todos` 계열만 경로를 쓴다(AD-01).
+**시퀀스 표기:** 참여자 약어는 사용자(U), 화면(UI), 상태 저장소(ST, Zustand), TanStack Query와 api(Q), Express 미들웨어(MW), controller(C), service(S), domain(D), repository(R), PostgreSQL(DB)이다. `MW`는 `cors`, `cookie-parser`, `auth`, `validate`, `errorHandler`를 묶어 표현한다. 오류 응답은 모두 NP-15 형식이며 `errorHandler`가 변환한다(LP-04). 요청 경로는 `backend/swagger.yaml`을 따른다(AD-01 해결). 일부 시퀀스는 동작 이름으로 적었다.
 
 ## 2. 배포 구성도
 
@@ -72,7 +85,7 @@ flowchart LR
 
     subgraph SERVER["서버 1대 - 같은 사이트, 다른 출처"]
         STATIC["프론트 출처<br/>Vite 빌드 결과 정적 자원<br/>FRONTEND_ORIGIN"]
-        API["API 출처<br/>Express 5 API 프로세스<br/>node 직접 실행, ESM<br/>cors FRONTEND_ORIGIN credentials<br/>헬스체크 인증 없음"]
+        API["API 출처<br/>Express 5 API 프로세스<br/>node 직접 실행, ESM<br/>cors FRONTEND_ORIGIN credentials<br/>헬스체크 인증 없음<br/>/api/docs Swagger UI, development만"]
         MEM["프로세스 메모리<br/>로그인 시도 기록<br/>PP-09"]
         API --- MEM
     end
@@ -96,7 +109,7 @@ flowchart LR
 | 인증 쿠키 | `access_token`(JWT HS384, 15분, `Path=/`)과 `refresh_token`(불투명, 7일, `Path=/api/auth`). 운영 `Secure`. JS에서 접근 불가 | PA-01, SP-03, NFR-10 |
 | 로그인 차단 | 프로세스 메모리. 재시작 시 초기화, 단일 인스턴스 전제 | PP-09, SP-08 |
 | DB 접속 | `pg.Pool` 하나, `date`(OID 1082)는 문자열로 파싱 | SP-10, NP-18 |
-| 운영 | `GET /api/health`(DB `SELECT 1`, 실패 시 503), `SIGTERM` 시 정리 후 종료. 캐시 서버·큐·CI 없음 | SP-12, PP-19, PRD 8장 |
+| 운영 | `GET /api/health`(DB `SELECT 1`, 실패 시 503), `SIGTERM`·`SIGINT` 시 정리 후 종료. 캐시 서버·큐·CI 없음. 개발 환경에서만 `/api/docs`(Swagger UI) 노출 | SP-12, PP-19, PRD 8장, 5번 문서 2.4 |
 
 ## 3. 프론트엔드 아키텍처
 
@@ -127,18 +140,24 @@ flowchart TD
     COMP["components: 도메인 무관 공통 UI<br/>TextField, DateField, StatusBadge,<br/>ConfirmDialog, Pagination 등"]
     API["api: client.ts fetch 래퍼<br/>auth, users, categories, todos, types"]
     STORES["stores: Zustand<br/>todoFilterStore, calendarStore, sessionStore"]
-    LIB["lib: date.ts todayLocal 등<br/>limits.ts AS-08 상수"]
+    LIB["lib: date.ts todayLocal 등<br/>limits.ts AS-08 상수, routes.ts<br/>messages.ts, queryKeys.ts"]
 
     ROUTER --> GUARD
     ROUTER --> PG
     QC --> STORES
+    QC --> API
+    QC --> LIB
     GUARD --> F_AUTH
+    GUARD --> COMP
     PG --> F_AUTH
     PG --> F_PROFILE
     PG --> F_CAT
     PG --> F_TODO
     PG --> F_CAL
-    F_TODO -->|"index.ts 공개 훅만"| F_CAT
+    F_TODO -->|"index.ts 공개 항목만"| F_CAT
+    F_CAL -->|"index.ts 공개 항목만"| F_CAT
+    F_TODO -->|"index.ts 공개 항목만"| F_AUTH
+    F_PROFILE -->|"index.ts 공개 항목만"| F_AUTH
     F_AUTH --> COMP
     F_PROFILE --> COMP
     F_CAT --> COMP
@@ -152,15 +171,19 @@ flowchart TD
     F_TODO --> STORES
     F_CAL --> STORES
     F_AUTH --> STORES
+    F_CAT -->|"삭제 시 필터 초기화"| STORES
     F_TODO --> LIB
     F_CAL --> LIB
+    F_AUTH --> LIB
+    F_CAT --> LIB
+    F_PROFILE --> LIB
     COMP --> LIB
     API --> LIB
     STORES --> LIB
 ```
 
 - 모든 호출은 `api/client.ts`의 단일 래퍼를 거친다(`credentials: 'include'`, 실패 시 `ApiError`). 컴포넌트가 `fetch`를 직접 쓰지 않는다. 래퍼는 `/api/auth/*`가 아닌 요청의 401 `UNAUTHENTICATED`에 갱신을 한 번(single-flight) 호출하고 원래 요청을 한 번 재시도한다(LP-08, 6.3, 6.9).
-- 기능 간 import는 상대 기능의 `index.ts` 공개 항목만 허용한다. 예: SC-06의 카테고리 선택은 `features/categories`의 공개 훅을 쓴다(LP 2.2, 5번 문서 6.2).
+- 기능 간 import는 상대 기능의 `index.ts` 공개 항목만 허용한다. 예: SC-06의 카테고리 선택, 할일 목록, 캘린더는 `features/categories`의 공개 훅(`useCategories`)을, todos·profile 폼은 `features/auth`의 공개 스키마·오류 변환을 쓴다(LP 2.2, 5번 문서 6.2). 상위 레이어(`app`, `pages`)는 하위 레이어를 직접 import할 수 있다.
 - 프론트는 상태를 계산하지 않고 API가 준 `status`를 `StatusBadge`로 표시만 한다(LP-13).
 - 근거: LP-01, LP 2.2, LP-08, LP-09, LP-13, 5번 문서 6.2 디렉토리 구조.
 
@@ -205,34 +228,40 @@ flowchart LR
 
 ### 4.1 미들웨어 체인
 
-5번 문서에 있는 구성요소만 표시한다. 정확한 `app.js` 등록 순서는 문서에 명시가 없으며 아래는 구성요소의 논리적 위치다(AD-12).
+`app.js` 등록 순서는 `x-powered-by` 비활성 → `cors` → `express.json(100kb)` → `cookieParser` → (development만) `/api/docs` → `/api` 라우터 → `notFound`(404) → `errorHandler`다. 라우트 단위는 `requireAuth → validate → controller`다(AD-12, 8번 문서 D-10).
 
 ```mermaid
 flowchart TD
-    REQ(["HTTP 요청"]) --> BASE["공통: x-powered-by 비활성, cors FRONTEND_ORIGIN credentials,<br/>express.json limit, cookie-parser"]
+    REQ(["HTTP 요청"]) --> BASE["공통: x-powered-by 비활성, cors FRONTEND_ORIGIN credentials,<br/>express.json limit 100kb, cookie-parser"]
+    BASE -.->|"development만"| DOCS["Swagger UI, 경로 api docs"]
     BASE --> ROUTER["routes/index.js"]
     ROUTER --> HEALTH["health.routes: 인증 없음<br/>DB SELECT 1"]
     ROUTER --> PUBLIC["auth.routes 가입 로그인 갱신 로그아웃<br/>auth 미적용, 갱신과 로그아웃은 쿠키 refresh_token 사용"]
-    ROUTER --> PROTECTED["users, categories, todos routes<br/>auth, validate zod"]
-    PROTECTED --> AUTH["auth 미들웨어<br/>쿠키 access_token, jwt.verify algorithms HS384, req에 userId"]
+    ROUTER --> PROTECTED["users, categories, todos routes<br/>requireAuth, 필요한 경로만 validate zod"]
+    ROUTER -->|"미등록 경로"| NF["notFound<br/>AppError 404 NOT_FOUND"]
+    PROTECTED --> AUTH["auth 미들웨어 requireAuth<br/>쿠키 access_token, jwt.verify algorithms HS384, req에 userId"]
     AUTH -->|"실패"| E401["AppError 401 UNAUTHENTICATED"]
     AUTH -->|"성공"| VALIDATE["validate 미들웨어<br/>zod 파싱, 알 수 없는 필드 제거"]
-    PUBLIC --> VALIDATE
-    VALIDATE -->|"실패"| E400["AppError 400 VALIDATION_ERROR + fields"]
+    PUBLIC -->|"가입 로그인"| VALIDATE
+    PUBLIC -->|"갱신 로그아웃"| CTRL
+    VALIDATE -->|"body, query 실패"| E400["AppError 400 VALIDATION_ERROR + fields"]
+    VALIDATE -->|"경로 ID 형식 실패"| E404["AppError 404 NOT_FOUND"]
     VALIDATE -->|"성공"| CTRL["controller"]
-    HEALTH --> RES(["응답"])
-    CTRL --> RES
+    HEALTH --> CTRL
+    CTRL --> RES(["응답"])
     E401 --> EH
     E400 --> EH
-    CTRL -.->|"AppError throw, async 거부 전파 LP-04"| EH["errorHandler<br/>NP-15 형식 변환, 5xx는 pino 로그만"]
+    E404 --> EH
+    NF --> EH
+    CTRL -.->|"AppError throw, async 거부 전파 LP-04"| EH["errorHandler<br/>NP-15 형식 변환, 5xx는 pino 로그만<br/>JSON 파싱 오류와 본문 초과는 400 VALIDATION_ERROR<br/>헬스 DB 실패는 503 SERVICE_UNAVAILABLE"]
     EH --> RES
 ```
 
 | 구성요소 | 역할 | 근거 |
 |----------|------|------|
-| `auth` | 쿠키 `access_token`의 JWT 검증(허용 알고리즘 `HS384`만). 페이로드는 `sub`·`iat`·`exp`. 갱신·로그아웃 경로에는 적용하지 않는다 | SP-03, PP-22 |
-| `validate` | 라우트 경계 zod 검증. 통과 값만 controller에 전달 | LP-05, FR-13 |
-| `errorHandler` | `AppError(status, code, message)`를 한 형식으로 응답. 500은 내부 정보 미노출, 5xx는 경로·시각과 함께 로그 | LP-04, NP-15, SP-09, NFR-12 |
+| `auth`(`requireAuth`) | 쿠키 `access_token`의 JWT 검증(허용 알고리즘 `HS384`만). 페이로드는 `sub`·`iat`·`exp`. 갱신·로그아웃 경로에는 적용하지 않는다 | SP-03, PP-22 |
+| `validate` | 라우트 경계 zod 검증. 통과 값만 controller에 전달. body·query 오류는 400 `VALIDATION_ERROR` + `fields`, 경로 ID 형식 오류는 404 `NOT_FOUND`(AD-11) | LP-05, FR-13 |
+| `errorHandler` | `AppError(status, code, message, fields?)`를 한 형식으로 응답. 미등록 경로(`notFound`)는 404, body-parser 오류(JSON 파싱 실패·100kb 초과)는 400 `VALIDATION_ERROR`. 500은 내부 정보 미노출, 5xx는 경로·시각과 함께 로그 | LP-04, NP-15, SP-09, NFR-12 |
 | `pino` | 구조화 로그, `password`·`Cookie`·토큰 필드 `redact` | SP-09 |
 
 ### 4.2 레이어 의존 방향
@@ -243,6 +272,7 @@ flowchart TD
     ROUTES --> VALID["validators<br/>zod 스키마"]
     ROUTES --> CTRL["controllers<br/>req 값 추출, 상태 코드, JSON 응답"]
     CTRL --> SVC["services<br/>BR 규칙, 트랜잭션 경계, AppError"]
+    CTRL -->|"쿠키 옵션"| LIB
     SVC --> REPO["repositories<br/>SQL 전용, 모든 함수에 userId와 실행자"]
     REPO --> DBL["db<br/>pool.js 타입 파서, query.js camelCase 변환,<br/>withTransaction"]
     DBL --> PG[("PostgreSQL 17")]
@@ -250,9 +280,10 @@ flowchart TD
     SVC --> DOM["domain<br/>todoStatus, dateString, limits<br/>순수 함수, import 없음"]
     REPO --> DOM
     VALID --> DOM
-    SVC --> LIB["lib<br/>errors, jwt, password,<br/>loginAttempts, logger"]
+    SVC --> LIB["lib<br/>errors, jwt, password,<br/>loginAttempts, logger, pgError"]
     MWS --> LIB
-    SVC --> DBL
+    SVC -->|"withTransaction"| DBL
+    DBL -->|"logger"| LIB
     DBL --> CFG["config/env.js<br/>zod 검증, 실패 시 시작 중단"]
     LIB --> CFG
 ```
@@ -260,12 +291,12 @@ flowchart TD
 - 금지 방향: controller → repository 건너뛰기, 역방향 import, `domain`의 외부 import(LP-01). SQL은 `repositories`에만 두고 값은 `$n` 바인딩으로만 넣으며, 모든 쿼리 WHERE에 `user_id`를 포함한다(CP-04, CP-07, SP-05, SP-06).
 - `services`는 `req`/`res`를 모른다. 쿠키 설정·만료는 controller가 `lib/jwt.js`의 쿠키 옵션으로 수행한다.
 - 트랜잭션은 서비스가 `withTransaction`으로 묶고, 리포지토리 함수는 마지막 인자로 실행자(풀 또는 트랜잭션 클라이언트)를 받는다. 수동 클라이언트는 `finally`에서 반드시 반환한다(LP-03, SP-10).
-- `validators → domain`(날짜 유효성 검사 재사용)은 5번 문서 2.1 문장에 명시가 없다(AD-14).
+- `validators → domain`(날짜 유효성 검사·길이 상수·상태 값 재사용)은 허용한다(AD-14, 8번 문서 D-10, 5번 문서 2.1).
 - 근거: LP-01~07, SP-05~06, SP-10.
 
 ## 5. 데이터 모델
 
-ERD는 `7-erd.md`(v0.4)로 분리했다. 개념 ERD, 테이블 명세, 제약·인덱스, BR별 DB 보장 매핑은 그 문서를 따른다.
+ERD는 `7-erd.md`(v0.5)로 분리했다. 개념 ERD, 테이블 명세, 제약·인덱스, BR별 DB 보장 매핑은 그 문서를 따른다.
 
 | 아키텍처 관점 요점 | 내용 | 근거 |
 |------|------|------|
@@ -314,7 +345,7 @@ sequenceDiagram
     else 통과
         UI->>Q: 가입 mutation 실행
         Q->>MW: 가입 요청
-        MW->>MW: validate zod 이메일 형식, 비밀번호 8자 이상, 이름 1~50자
+        MW->>MW: validate zod 이메일 형식 255자 이하, 비밀번호 8자 이상 72바이트 이하, 이름 trim 후 1~50자
         Note over MW: 이메일은 공백 제거와 소문자 정규화 PP-08, 알 수 없는 필드 제거
         alt 서버 검증 실패
             MW-->>Q: 400 VALIDATION_ERROR와 fields
@@ -331,7 +362,7 @@ sequenceDiagram
             alt 이메일 고유 제약 위반 23505
                 DB-->>R: unique violation
                 S->>DB: ROLLBACK
-                S-->>MW: AppError 409 throw
+                S-->>MW: AppError 409 EMAIL_ALREADY_EXISTS, fields.email, 제약명 uq_users_email일 때만
                 MW-->>Q: 409 에러 응답
                 Q-->>UI: ApiError
                 UI-->>U: 이메일 필드 아래 오류, 입력값 유지
@@ -350,7 +381,7 @@ sequenceDiagram
     Note over S,DB: 트랜잭션 중 예외는 ROLLBACK 후 500 INTERNAL_ERROR, 클라이언트는 finally에서 반환
 ```
 
-- 근거: BR-03, BR-06, FR-01, FR-13, LP-03, LP-06, SA-01, SP-04, SP-10, WA-02. 이메일 중복을 사전 조회가 아니라 DB 고유 제약(NP-10) 위반 변환으로 그린 것은 동시 가입에도 안전하기 때문이며, 선택은 AD-15에 남긴다. 쿠키는 발급하지 않는다.
+- 근거: BR-03, BR-06, FR-01, FR-13, LP-03, LP-06, SA-01, SP-04, SP-10, WA-02. 이메일 중복을 사전 조회가 아니라 DB 고유 제약(NP-10) 위반 변환으로 그린 것은 동시 가입에도 안전하기 때문이며, 구현도 이 방식이다(AD-15 해결). 쿠키는 발급하지 않는다.
 
 ### 6.2 로그인과 실패 차단 (SN-02)
 
@@ -370,7 +401,7 @@ sequenceDiagram
     U->>UI: 이메일 비밀번호 입력 후 로그인
     UI->>Q: 로그인 mutation 실행
     Q->>MW: 로그인 요청
-    MW->>MW: validate zod 필수값 확인, 이메일 정규화
+    MW->>MW: validate zod 이메일 형식, 비밀번호 1자 이상, 이메일 trim과 소문자 정규화
     alt 검증 실패
         MW-->>Q: 400 VALIDATION_ERROR
     else 통과
@@ -384,6 +415,7 @@ sequenceDiagram
             Q-->>UI: ApiError
             UI-->>U: 폼 상단에 차단 안내 문구
         else 차단 아님
+            S->>LA: 실패 횟수 미리 증가, 동시 요청이 함께 차단 검사를 통과하지 못하게 함, 5회째에 차단 시작
             S->>R: 이메일로 인증용 조회, password_hash 포함
             R->>DB: SELECT 컬럼 명시 FROM users WHERE email = $1
             DB-->>R: 행 또는 없음
@@ -393,21 +425,22 @@ sequenceDiagram
                 S->>S: bcrypt 비교
             end
             alt 비교 실패 또는 이메일 없음
-                S->>LA: 실패 횟수 증가, 없는 이메일도 집계, 5회째에 차단 시작
+                Note over S,LA: 실패는 이미 집계됨, 없는 이메일도 같은 방식
                 S-->>MW: AppError 401 INVALID_CREDENTIALS, 두 경우 동일 응답
                 MW-->>Q: 401
                 Q-->>UI: ApiError, 전역 onError는 이동하지 않음 LP-09
                 UI-->>U: 폼 상단 단일 문구, 비밀번호 입력 비움
             else 비교 성공
                 S->>LA: 해당 이메일 횟수 초기화
-                S->>S: Access Token JWT HS384 서명 15분, 페이로드 sub iat exp
                 S->>S: Refresh Token 생성 randomBytes 32 base64url, SHA-256 해시 계산
                 S->>R: 그 사용자의 만료된 refresh_tokens 행 정리
                 R->>DB: DELETE FROM refresh_tokens WHERE user_id = $1 AND expires_at <= now
+                Note over S,DB: 트랜잭션 없음, 정리 DELETE 실패는 warn 로그 후 계속 AD-16
                 S->>R: Refresh Token 행 저장, 만료는 지금부터 7일
                 R->>DB: INSERT INTO refresh_tokens user_id token_hash expires_at
+                S->>S: Access Token JWT HS384 서명 15분, 페이로드 sub iat exp
                 S-->>C: 사용자 정보와 두 토큰 원문
-                C-->>Q: 200과 Set-Cookie access_token 15분 Path=/ 및 refresh_token 7일 Path=/api/auth, 둘 다 HttpOnly SameSite=Lax 운영 Secure
+                C-->>Q: 200 본문 id email name, Set-Cookie access_token 15분 Path=/ 및 refresh_token 7일 Path=/api/auth, 둘 다 HttpOnly SameSite=Lax 운영 Secure
                 Q->>Q: me 캐시에 사용자 저장
                 Q-->>UI: 성공
                 UI-->>U: SC-05로 이동 SA-02
@@ -416,7 +449,7 @@ sequenceDiagram
     end
 ```
 
-- 근거: FR-02, NFR-11, SN-02, SA-02, SA-03, SP-03, SP-04, SP-08, WA-03, PP-11, PA-01. 5회째 실패 응답은 401이고 6번째 시도부터 429다(SN-02 기대 결과). 차단 판정은 인메모리라 DB를 쓰지 않는다(PP-09). 로그인마다 `refresh_tokens` 1행이 생기며 여러 기기 로그인이 가능하다(SA-10). 만료 행 정리는 로그인 때만 한다. 원문 토큰은 저장하지 않고 해시만 저장한다(ER-13). 차단 세부 동작은 AD-05, 정리·INSERT의 트랜잭션 여부는 AD-16.
+- 근거: FR-02, NFR-11, SN-02, SA-02, SA-03, SP-03, SP-04, SP-08, WA-03, PP-11, PA-01. 5회째 실패 응답은 401이고 6번째 시도부터 429다(SN-02 기대 결과). 차단 판정은 인메모리라 DB를 쓰지 않는다(PP-09). 로그인마다 `refresh_tokens` 1행이 생기며 여러 기기 로그인이 가능하다(SA-10). 만료 행 정리는 로그인 때만 한다. 원문 토큰은 저장하지 않고 해시만 저장한다(ER-13). 만료 행 정리와 INSERT는 트랜잭션으로 묶지 않으며, 정리 실패는 경고 로그 후 계속하고 INSERT 실패는 500이다(AD-16). 차단 중 시도는 차단을 연장하지 않는다(AD-05). 실패 집계를 비밀번호 비교 전에 하므로(`auth.service.js`) 동시 요청으로 차단 검사를 우회할 수 없고, 비교 성공 시 초기화된다.
 
 ### 6.3 인증 미들웨어와 401 처리, 로그아웃 (SN-03, SN-04, SN-15)
 
@@ -470,7 +503,7 @@ sequenceDiagram
             Q->>UI: SC-02로 이동
             UI-->>U: 세션이 만료되었습니다 안내 WA-21
         else 앱 진입 시 me 조회의 401 또는 미인증 직접 접근
-            Q->>UI: SC-02로 이동
+            Q->>UI: me 조회는 401을 null로 받음, 가드 RequireAuth가 SC-02로 이동
             UI-->>U: 안내 없음
         end
     else 코드가 INVALID_CREDENTIALS 또는 그 밖의 4xx
@@ -489,21 +522,21 @@ sequenceDiagram
         UI-->>U: 헤더 아래 오류 영역 표시, 로그인 상태 유지 SA-05
     else 성공
         MW->>C: 로그아웃 처리
+        C->>S: 쿠키 refresh_token 값 전달, 없으면 빈 값
         opt 쿠키 refresh_token 이 있음
-            C->>S: 해당 Refresh Token 폐기
             S->>S: SHA-256 해시 계산
             S->>R: 해시로 행 삭제
             R->>DB: DELETE FROM refresh_tokens WHERE token_hash = $1
         end
         C-->>Q: 204, 쿠키 access_token과 refresh_token 둘 다 발급 때와 같은 속성으로 만료
-        Q->>Q: 서버 데이터 캐시 비움
+        Q->>Q: 서버 데이터 캐시 비움, me를 null로 설정해 로그인 화면이 갱신 요청을 하지 않음 AD-13
         Q->>UI: SC-02로 이동
         UI-->>U: 안내 없음, 이전 사용자 데이터 미노출 E2E-02
     end
     end
 ```
 
-- 근거: FR-02, FR-11, LP-08~10, SP-03, SN-03, SN-04, SN-15, WA-21, SA-04, SA-05, E2E-02, PP-22. 로그인 요청의 `INVALID_CREDENTIALS` 401은 이동 대상이 아니다. TanStack Query 재시도는 4xx에 하지 않는다(LP-10). `/api/auth/*` 요청의 401은 갱신 대상이 아니다. 로그아웃은 서버에서 Refresh Token 행을 삭제해 세션을 폐기하지만, 이미 발급된 Access Token은 최대 15분 유효하다(PA-01 한계). 로그아웃은 인증 미들웨어 없이 `refresh_token` 쿠키만 사용하므로 Access Token이 만료된 뒤에도 폐기된다(AD-13 해결). 캐시 비움 시점은 6.3 C·D에 그린 대로 둔다.
+- 근거: FR-02, FR-11, LP-08~10, SP-03, SN-03, SN-04, SN-15, WA-21, SA-04, SA-05, E2E-02, PP-22. 로그인 요청의 `INVALID_CREDENTIALS` 401은 이동 대상이 아니다. TanStack Query 재시도는 4xx에 하지 않는다(LP-10). `/api/auth/*` 요청의 401은 갱신 대상이 아니다. 로그아웃은 서버에서 Refresh Token 행을 삭제해 세션을 폐기하지만, 이미 발급된 Access Token은 최대 15분 유효하다(PA-01 한계). 로그아웃은 인증 미들웨어 없이 `refresh_token` 쿠키만 사용하므로 Access Token이 만료된 뒤에도 폐기된다(AD-13 해결). '항상 204'는 쿠키 유무·유효성과 무관하다는 뜻이며, DELETE 자체가 DB 오류로 실패하면 500이다. 캐시 비움 시점은 6.3 C·D에 그린 대로 둔다.
 
 ### 6.4 할일 목록 조회와 필터 (SN-11)
 
@@ -525,7 +558,7 @@ sequenceDiagram
     UI->>ST: 카테고리 또는 상태 필터 저장, 필터 변경 시 페이지 1로
     UI->>UI: lib todayLocal로 로컬 오늘 YYYY-MM-DD 생성
     UI->>Q: 목록 조회, 쿼리 키에 today와 필터와 페이지 포함
-    Q->>MW: GET /api/todos 와 today 카테고리 상태 페이지 쿼리
+    Q->>MW: GET /api/todos 쿼리 today categoryId status page, status 값은 한글 상태 라벨
     MW->>MW: auth 쿠키 검증
     alt 인증 실패
         MW-->>Q: 401 UNAUTHENTICATED, 6.3 참조
@@ -538,19 +571,29 @@ sequenceDiagram
         else 통과
             MW->>C: userId와 검증된 쿼리
             C->>S: 목록 조회 userId today 필터 페이지
-            S->>R: 페이지 조회와 건수 조회 요청, 필터에 userId 포함
-            R->>D: 상태 필터의 SQL 조건 조각 요청
+            opt categoryId 지정
+                S->>R: 카테고리 소유자 조건 조회
+                R->>DB: SELECT id, name, is_default FROM categories WHERE id = $1 AND user_id = $2
+                break 없음 또는 타인 카테고리, 이후 처리 중단
+                    S-->>MW: AppError 404 NOT_FOUND AD-08
+                    MW-->>Q: 404
+                    Q-->>UI: ApiError
+                    UI-->>U: 상단 오류 영역 5.4
+                end
+            end
+            S->>R: 페이지 조회와 건수 조회를 병렬 요청 Promise.all, 필터에 userId 포함
+            R->>D: 상태 필터의 SQL 조건 조각 요청 statusCondition
             D-->>R: 완료, 기한 초과, 시작 전, 진행중 조건 조각
             R->>DB: SELECT 컬럼 명시 FROM todos WHERE user_id = $1 AND 카테고리 AND 상태 조건 날짜는 $n::date
             Note over R,DB: ORDER BY end_date, created_at, id 오름차순 LIMIT 50 OFFSET 페이지 계산
-            R->>DB: SELECT count 같은 WHERE
-            DB-->>R: 행과 건수, 날짜는 문자열 그대로, 건수는 Number
+            R->>DB: SELECT count(*)::int AS n FROM todos 같은 WHERE
+            DB-->>R: 행과 건수, 날짜는 문자열 그대로, 건수는 int
             R-->>S: camelCase 변환된 행과 전체 건수 NP-12
             loop 각 행
                 S->>D: deriveStatus todo today
                 D-->>S: 완료, 기한 초과, 시작 전, 진행중 중 하나
             end
-            S-->>C: 항목에 status를 붙인 결과와 전체 건수 PP-21
+            S-->>C: items에 status를 붙인 결과, page, pageSize 50, totalCount PP-21
             C-->>Q: 200
             Q-->>UI: 목록 캐시 갱신
             alt 결과 없음
@@ -565,7 +608,7 @@ sequenceDiagram
     end
 ```
 
-- 근거: FR-06, UC-07, BR-13, AS-06, PA-06, PP-06, PP-21, LP-07, LP-11, NP-12, NP-18, NP-20, NP-21, WA-09. 상태 판정은 SQL 조건과 `deriveStatus` 두 형태로 `domain/todoStatus.js`에 있고 일치 테스트로 묶인다(TP-02). 서버 시계는 상태 판정에 쓰지 않는다. 정렬 동점은 `id` 3순위로 해결(`7-erd.md` ER-05), 잘못된 카테고리 필터는 AD-08.
+- 근거: FR-06, UC-07, BR-13, AS-06, PA-06, PP-06, PP-21, LP-07, LP-11, NP-12, NP-18, NP-20, NP-21, WA-09. 상태 판정은 SQL 조건과 `deriveStatus` 두 형태로 `domain/todoStatus.js`에 있고 일치 테스트로 묶인다(TP-02). 서버 시계는 상태 판정에 쓰지 않는다. 정렬 동점은 `id` 3순위로 해결(`7-erd.md` ER-05). 없는·타인 카테고리 필터는 서비스가 먼저 확인해 404로 응답한다(AD-08).
 
 ### 6.5 할일 등록·수정 (SN-07, SN-08, SN-13)
 
@@ -595,11 +638,11 @@ sequenceDiagram
         UI-->>U: 필드 아래 오류, 요청 안 보냄
     else 통과
         UI->>Q: 등록 또는 수정 mutation 실행
-        Q->>MW: POST /api/todos 또는 수정 요청 /api/todos/:id
+        Q->>MW: POST /api/todos 또는 PUT /api/todos/:id 전체 수정, isCompleted 필수
         MW->>MW: auth 쿠키 검증, 실패 시 401 6.3 참조
         MW->>D: 날짜 문자열 달력 유효성 검사
         MW->>MW: validate zod 제목 1~100, 메모 최대 1000, 시작일 종료일 필수, 종료일은 시작일 이상 문자열 비교
-        Note over MW: 알 수 없는 필드 제거, userId는 본문에서 받지 않음
+        Note over MW: 알 수 없는 필드 제거, userId는 본문에서 받지 않음, 경로 ID 형식 오류는 404 AD-11
         alt 서버 검증 실패
             MW-->>Q: 400 VALIDATION_ERROR와 fields
             Q-->>UI: ApiError
@@ -607,20 +650,10 @@ sequenceDiagram
         else 통과
             MW->>C: userId와 검증된 본문
             C->>S: 등록 또는 수정 처리
-            Note over S,DB: 단일 쓰기 문장이라 트랜잭션 없음 LP-03
-            opt 수정일 때
-                S->>R: 할일 소유자 조건 조회
-                R->>DB: SELECT 컬럼 명시 FROM todos WHERE id = $1 AND user_id = $2
-                break 없음 또는 타인 소유, 이후 처리 중단
-                    S-->>MW: AppError 404 NOT_FOUND
-                    MW-->>Q: 404, 본문은 없는 ID와 동일 NP-16
-                    Q-->>UI: ApiError
-                    UI-->>U: 폼 상단 오류 영역
-                end
-            end
+            Note over S,DB: 단일 쓰기 문장이라 트랜잭션 없음 LP-03, 수정도 할일 사전 조회 없이 UPDATE 결과로 판단
             alt 카테고리 지정됨
                 S->>R: 카테고리 소유자 조건 조회
-                R->>DB: SELECT FROM categories WHERE id = $1 AND user_id = $2
+                R->>DB: SELECT id, name, is_default FROM categories WHERE id = $1 AND user_id = $2
                 break 없음 또는 타인 카테고리, 이후 처리 중단
                     S-->>MW: AppError 404 NOT_FOUND, PP-18
                     MW-->>Q: 404
@@ -629,17 +662,23 @@ sequenceDiagram
                 end
             else 선택 안 함
                 S->>R: 사용자의 기본 카테고리 조회 BR-07
-                R->>DB: SELECT FROM categories WHERE user_id = $1 AND is_default
+                R->>DB: SELECT id, name, is_default FROM categories WHERE user_id = $1 AND is_default = true
             end
             alt 등록
                 S->>R: INSERT
-                R->>DB: INSERT INTO todos user_id category_id title memo start_date end_date
+                R->>DB: INSERT INTO todos user_id category_id title memo start_date end_date, 빈 메모는 NULL
             else 수정
                 S->>R: UPDATE
-                R->>DB: UPDATE todos SET 컬럼 WHERE id = $1 AND user_id = $2
-                Note over R,DB: 0행이면 그 사이 삭제된 것이므로 404 처리
+                R->>DB: UPDATE todos SET 컬럼, updated_at = now() WHERE id = $1 AND user_id = $2 RETURNING 컬럼
+                break 0행 - 없음, 타인 소유, 그 사이 삭제
+                    S-->>MW: AppError 404 NOT_FOUND
+                    MW-->>Q: 404, 본문은 없는 ID와 동일 NP-16
+                    Q-->>UI: ApiError
+                    UI-->>U: 폼 상단 오류 영역
+                end
             end
             Note over DB: end_date 가 start_date 이상 이라는 CHECK 제약이 최종 방어 NP-10
+            Note over S,DB: FK 위반 23503 fk_todos_category_id_user_id 는 조회와 쓰기 사이 카테고리 삭제이므로 404 NOT_FOUND PP-18
             DB-->>R: 저장된 행
             R-->>S: 결과, camelCase
             S-->>C: 결과
@@ -681,7 +720,7 @@ sequenceDiagram
         Note over S,DB: 트랜잭션 시작 withTransaction, 풀 클라이언트 1개 LP-03
         S->>DB: BEGIN
         S->>R: 카테고리 소유자 조건 조회
-        R->>DB: SELECT id is_default FROM categories WHERE id = $1 AND user_id = $2
+        R->>DB: SELECT id, name, is_default FROM categories WHERE id = $1 AND user_id = $2
         alt 없음 또는 타인 소유
             S->>DB: ROLLBACK
             S-->>MW: AppError 404 NOT_FOUND
@@ -690,18 +729,25 @@ sequenceDiagram
             UI-->>U: 상단 오류 영역
         else 기본 카테고리 BR-08
             S->>DB: ROLLBACK
-            S-->>MW: AppError 409 규칙 위반
+            S-->>MW: AppError 409 DEFAULT_CATEGORY_PROTECTED
             MW-->>Q: 409
             Q-->>UI: ApiError
             UI-->>U: 상단 오류 영역 4.4, 정상 화면에서는 버튼 자체가 없음 WA-07
         else 삭제 가능
             S->>R: 사용자의 기본 카테고리 조회
-            R->>DB: SELECT id FROM categories WHERE user_id = $1 AND is_default
+            R->>DB: SELECT id, name, is_default FROM categories WHERE user_id = $1 AND is_default = true
             S->>R: 소속 할일을 기본 카테고리로 이동
-            R->>DB: UPDATE todos SET category_id = 기본 WHERE user_id = $1 AND category_id = $2
+            R->>DB: UPDATE todos SET category_id = $3, updated_at = now() WHERE user_id = $1 AND category_id = $2
             S->>R: 카테고리 삭제
-            R->>DB: DELETE FROM categories WHERE id = $1 AND user_id = $2 AND is_default = false
-            alt DB 오류 발생
+            R->>DB: DELETE FROM categories WHERE id = $1 AND user_id = $2 AND is_default = false RETURNING id
+            Note over S,DB: 0행이면 그 사이 삭제된 것이므로 ROLLBACK 후 404 NOT_FOUND
+            alt FK 위반 23503 - 동시에 그 카테고리로 할일 등록 또는 수정
+                S->>DB: ROLLBACK
+                S-->>MW: AppError 409 CATEGORY_IN_USE
+                MW-->>Q: 409
+                Q-->>UI: ApiError
+                UI-->>U: 상단 오류 영역, 카테고리와 할일 모두 변화 없음
+            else 그 밖의 DB 오류 발생
                 S->>DB: ROLLBACK
                 S-->>MW: 예외 전파
                 MW-->>Q: 500 INTERNAL_ERROR, 스택은 로그에만
@@ -719,7 +765,7 @@ sequenceDiagram
     end
 ```
 
-- 근거: BR-08, BR-10, FR-04, UC-05, LP-03, SP-10, SN-06, TP-11(할일 총수 불변). 이동과 삭제가 하나의 트랜잭션이라 중간 실패 시 할일이 사라지거나 카테고리만 남는 상태가 생기지 않는다. 삭제 후 목록 필터에 남은 카테고리 ID 처리는 AD-08, 동시성은 FK `ON DELETE RESTRICT`로 할일 소실 대신 한쪽이 실패한다(`7-erd.md` ER-04).
+- 근거: BR-08, BR-10, FR-04, UC-05, LP-03, SP-10, SN-06, TP-11(할일 총수 불변). 이동과 삭제가 하나의 트랜잭션이라 중간 실패 시 할일이 사라지거나 카테고리만 남는 상태가 생기지 않는다. 삭제 후 목록 필터에 남은 카테고리 ID 처리는 AD-08, 동시성은 FK `ON DELETE RESTRICT`로 할일 소실 대신 한쪽이 실패한다(삭제 쪽 실패 시 409 `CATEGORY_IN_USE`, 할일 쪽 실패 시 404, `7-erd.md` ER-04, AD-09).
 
 ### 6.7 캘린더 조회 (SN-12)
 
@@ -743,9 +789,9 @@ sequenceDiagram
     Note over UI: 월은 그 달 1일부터 말일, 주는 일요일부터 토요일, 일은 같은 날
     UI->>UI: lib todayLocal 로 오늘 생성
     UI->>Q: 캘린더 조회, 쿼리 키에 today와 범위 포함
-    Q->>MW: 할일 기간 조회 요청 범위 시작 끝과 today
+    Q->>MW: GET /api/todos/calendar 쿼리 from to today
     MW->>MW: auth 쿠키 검증, 실패 시 401 6.3 참조
-    MW->>MW: validate zod 범위와 today 날짜 형식, 달력상 유효
+    MW->>MW: validate zod from to today 날짜 형식, 달력상 유효, from 이 to 이하, 범위 42일 이하 AD-07
     alt 검증 실패
         MW-->>Q: 400 VALIDATION_ERROR와 fields
         Q-->>UI: ApiError
@@ -754,14 +800,16 @@ sequenceDiagram
         MW->>C: userId와 범위와 today
         C->>S: 기간 조회 처리
         S->>R: 기간이 겹치는 할일 조회
-        R->>DB: SELECT 컬럼 명시 FROM todos WHERE user_id = $1 AND start_date 가 범위 끝 이하 AND end_date 가 범위 시작 이상
+        R->>D: 겹침 SQL 조건 조각 요청 overlapCondition
+        D-->>R: start_date 가 범위 끝 이하 AND end_date 가 범위 시작 이상
+        R->>DB: SELECT 컬럼 명시 FROM todos WHERE user_id = $1 AND 겹침 조건 날짜는 $n::date ORDER BY end_date, created_at, id, 상한 없음
         DB-->>R: 겹치는 행, 날짜는 문자열 그대로
         R-->>S: camelCase 행
         loop 각 행
             S->>D: deriveStatus todo today
             D-->>S: 상태
         end
-        S-->>C: status 포함 목록
+        S-->>C: items, 각 항목에 status 포함
         C-->>Q: 200
         Q-->>UI: 캐시 갱신
         UI->>UI: features calendar 순수 함수가 범위로 잘라 막대 배치, 범위 밖 이어짐 표시 CV-01 ~ CV-05
@@ -773,7 +821,7 @@ sequenceDiagram
     end
 ```
 
-- 근거: FR-10, UC-11, AS-09, NFR-04(뷰 범위만 조회), PA-06, PP-06, PP-14, CV-01~05, LP-07, LP-11, NP-20, WA-16~18. 겹침 조건은 시작일이 범위 끝 이하이고 종료일이 범위 시작 이상이다(CV 표와 일치). 날짜 비교는 문자열이다. 조회 리소스 형태·결과 상한은 AD-01, AD-07.
+- 근거: FR-10, UC-11, AS-09, NFR-04(뷰 범위만 조회), PA-06, PP-06, PP-14, CV-01~05, LP-07, LP-11, NP-20, WA-16~18. 겹침 조건은 시작일이 범위 끝 이하이고 종료일이 범위 시작 이상이다(CV 표와 일치). 날짜 비교는 문자열이다. 조회는 `GET /api/todos/calendar`이고, 결과 상한 없음·범위 최대 42일(초과 400)·목록과 같은 정렬이다(AD-07).
 
 ### 6.8 비밀번호 변경 (SN-05)
 
@@ -796,9 +844,9 @@ sequenceDiagram
         UI-->>U: 새 비밀번호 필드 아래 오류
     else 통과
         UI->>Q: 비밀번호 변경 mutation 실행
-        Q->>MW: 변경 요청
+        Q->>MW: PUT /api/users/me/password
         MW->>MW: auth 쿠키 검증, 실패 시 401 6.3 참조
-        MW->>MW: validate zod 현재 비밀번호 필수, 새 비밀번호 8자 이상
+        MW->>MW: validate zod 현재 비밀번호 필수, 새 비밀번호 8자 이상 72바이트 이하
         alt 서버 검증 실패
             MW-->>Q: 400 VALIDATION_ERROR와 fields
             Q-->>UI: ApiError
@@ -811,8 +859,8 @@ sequenceDiagram
             DB-->>R: 해시
             S->>S: bcrypt 로 현재 비밀번호 비교
             alt 불일치 BR-12
-                S-->>MW: AppError, 상태 코드와 code 는 AD-04
-                MW-->>Q: 오류 응답
+                S-->>MW: AppError 400 VALIDATION_ERROR, fields.currentPassword AD-04
+                MW-->>Q: 400
                 Q-->>UI: ApiError
                 UI-->>U: 현재 비밀번호 필드 아래 오류, 기존 비밀번호 유지, 비밀번호 필드 비움
             else 일치
@@ -821,7 +869,7 @@ sequenceDiagram
                 S->>R: 비밀번호 갱신
                 R->>DB: UPDATE users SET password_hash = $1 WHERE id = $2
                 S-->>C: 완료
-                C-->>Q: 성공 응답, 쿠키 재발급 없음, refresh_tokens 변경 없음
+                C-->>Q: 204, 쿠키 재발급 없음, refresh_tokens 변경 없음
                 Q-->>UI: 성공
                 UI-->>U: 입력란 초기화, 인라인 안내, 로그인 상태 유지 WA-06
             end
@@ -829,7 +877,7 @@ sequenceDiagram
     end
 ```
 
-- 근거: FR-03, UC-04, BR-12, AS-05, WA-06, PP-22, SP-04, LP-06, SN-05. 변경 후에도 현재 세션(두 토큰)이 유지된다. 다른 기기의 Refresh Token 폐기 여부는 미결이다(PRD OQ-03, PP-23). 이메일은 수정 대상이 아니라 요청에 받지 않는다.
+- 근거: FR-03, UC-04, BR-12, AS-05, WA-06, PP-22, SP-04, LP-06, SN-05. 변경 후에도 현재 세션(두 토큰)이 유지된다. 다른 기기의 Refresh Token도 폐기하지 않는다(PP-23, 8번 문서 D-18). 이메일은 수정 대상이 아니라 요청에 받지 않는다.
 
 ### 6.9 토큰 갱신(rotation) (SN-15)
 
@@ -844,27 +892,30 @@ sequenceDiagram
     participant DB as PostgreSQL
 
     Note over Q: 트리거 - api auth 아래가 아닌 요청이 401 UNAUTHENTICATED, 동시 401은 갱신 하나를 공유 single-flight
-    Q->>MW: 갱신 요청, 쿠키 refresh_token 만 사용
-    Note over MW: auth 미들웨어 없음, cookie-parser 로 refresh_token 읽기
+    Q->>MW: POST /api/auth/refresh, 쿠키 refresh_token 만 사용
+    Note over MW: auth 미들웨어와 validate 없음, cookie-parser 로 refresh_token 읽기
+    MW->>C: 쿠키 값, 없으면 빈 값
+    C->>S: 갱신 처리
     alt 쿠키 refresh_token 없음
-        MW-->>Q: 401 UNAUTHENTICATED, 쿠키 2종 만료
+        S-->>C: AppError 401 UNAUTHENTICATED
+        C-->>Q: 401과 Set-Cookie 쿠키 2종 만료, 응답 변환은 errorHandler
     else 있음
-        MW->>C: 쿠키 값
-        C->>S: 갱신 처리
-        S->>S: SHA-256 해시 계산
-        Note over S,DB: 트랜잭션 시작, 풀 클라이언트 1개 사용
+        S->>S: 새 Refresh Token 생성 randomBytes 32 base64url, 트랜잭션 전에 수행
+        S->>S: 기존 토큰 SHA-256 해시 계산
+        Note over S,DB: 트랜잭션 시작 withTransaction, 풀 클라이언트 1개 사용
         S->>DB: BEGIN
-        S->>R: 기존 행 삭제
-        R->>DB: DELETE FROM refresh_tokens WHERE token_hash = $1 AND expires_at > now RETURNING user_id, expires_at
+        S->>R: 기존 행 소비 consume
+        R->>DB: DELETE FROM refresh_tokens WHERE token_hash = $1 AND expires_at > $2 RETURNING user_id, expires_at
+        Note over R,DB: $2 는 서버 프로세스 시각 JS Date, 로그인 정리 DELETE 는 DB now 사용
         alt 행 없음 - 미발급, 만료, 폐기됨, 이미 사용됨
             DB-->>R: 0행
-            S->>DB: ROLLBACK
-            S-->>MW: AppError 401 UNAUTHENTICATED
-            MW-->>Q: 401과 Set-Cookie 쿠키 2종 만료
+            S->>DB: COMMIT 변경 없음, 콜백이 null 반환
+            S-->>C: 트랜잭션 밖에서 AppError 401 UNAUTHENTICATED
+            C-->>Q: 401과 Set-Cookie 쿠키 2종 만료, 응답 변환은 errorHandler
             Q->>Q: 갱신 실패, 원래 요청의 401을 throw, 이후 6.3 C
         else 행 삭제됨
             DB-->>R: user_id 와 기존 expires_at
-            S->>S: 새 Refresh Token 생성 randomBytes 32 base64url, 해시 계산
+            S->>S: 새 토큰 해시 계산
             S->>R: 새 행 저장, 만료는 기존 expires_at을 그대로 이어받음
             R->>DB: INSERT INTO refresh_tokens user_id token_hash expires_at
             alt DB 오류 발생
@@ -876,7 +927,7 @@ sequenceDiagram
                 S->>DB: COMMIT
                 S->>S: 새 Access Token JWT HS384 서명 15분
                 S-->>C: 두 토큰 원문
-                C-->>Q: 성공 응답과 Set-Cookie access_token 및 refresh_token, 로그인 때와 같은 속성
+                C-->>Q: 204와 Set-Cookie access_token 및 refresh_token, 로그인 때와 같은 속성
                 Q->>MW: 원래 요청을 한 번만 재시도
                 MW-->>Q: 정상 응답
             end
@@ -884,7 +935,7 @@ sequenceDiagram
     end
 ```
 
-- 근거: PA-01, SP-03, LP-03, LP-08, LP-09, SN-03, SN-15, ER-13~15. Refresh Token의 절대 만료(로그인 후 최대 7일)를 유지하려고 새 행은 기존 `expires_at`을 이어받는다(확정 설계의 `RETURNING user_id`에 이어받기용 `expires_at`을 함께 반환하는 것으로 그렸다). 상태 코드와 응답 본문은 API 명세에서 정한다(AD-01). 이미 사용된 토큰은 행이 없어 401이며 계열 전체 폐기(재사용 탐지)는 하지 않는다(PA-01 한계, ER-15). 여러 탭의 동시 갱신은 AD-17.
+- 근거: PA-01, SP-03, LP-03, LP-08, LP-09, SN-03, SN-15, ER-13~15. Refresh Token의 절대 만료(로그인 후 최대 7일)를 유지하려고 새 행은 기존 `expires_at`을 이어받는다(`RETURNING user_id, expires_at`). 성공은 204(본문 없음)다. 행이 없을 때는 바뀐 것이 없으므로 ROLLBACK 대신 COMMIT으로 끝나며 결과는 같다. 만료 판정 시계가 갱신은 서버 프로세스 시각, 로그인 정리는 DB `now()`로 섞여 있으나 같은 서버·DB 시각 동기화 전제에서 영향이 없다. 이미 사용된 토큰은 행이 없어 401이며 계열 전체 폐기(재사용 탐지)는 하지 않는다(PA-01 한계, ER-15). 여러 탭의 동시 갱신은 AD-17.
 
 ## 7. 아키텍처 점검 요약
 
@@ -892,9 +943,9 @@ sequenceDiagram
 |------|------|------|
 | 문서에 없는 구성요소 추가 | 없음. 캐시 서버, 큐, 마이크로서비스, CI, 메트릭 서버, ORM은 그리지 않았다 | CP-01, PP-19, PRD 8장 |
 | 상태 저장 컬럼 | 없음. `is_completed`만 저장 | BR-13, CP-02 |
-| 모든 데이터 쿼리의 `user_id` 조건 | 시퀀스의 SQL 모두 포함(인증용 `users` 조회와 로그인 이메일 조회 제외) | SP-06 |
+| 모든 데이터 쿼리의 `user_id` 조건 | 시퀀스의 SQL 모두 포함(인증용 `users` 조회, 로그인 이메일 조회, `refresh_tokens`의 `token_hash` 조회 제외) | SP-06 |
 | 서버 시계 사용 범위 | 시각 기록, JWT·Refresh Token 만료, 로그인 차단만. 상태 판정은 요청의 `today` | NP-22, NP-21 |
-| 트랜잭션 | 가입(6.1), 카테고리 삭제(6.6), 토큰 갱신(6.9)만 사용. 나머지는 단일 문장(로그인의 만료 행 정리와 INSERT는 AD-16) | LP-03 |
+| 트랜잭션 | 가입(6.1), 카테고리 삭제(6.6), 토큰 갱신(6.9)만 사용. 나머지는 단일 문장이다. 로그인의 만료 행 정리와 INSERT는 트랜잭션 없이 순서대로 실행한다(AD-16) | LP-03 |
 
 ## 8. 가정·미결 사항
 
@@ -910,12 +961,12 @@ sequenceDiagram
 | AD-06 | 해결 | 목록 정렬이 종료일, 생성일시 순이라 두 값이 같은 행끼리 순서가 비결정적이어서 페이지 경계에서 중복·누락이 생길 수 있다. 보조 정렬 키(`id`) 추가 여부가 없다(FR-06). → `7-erd.md` ER-05에서 `id`를 3순위 정렬 키로 결정. |
 | AD-07 | 해결 | 캘린더 조회의 결과 건수 상한·정렬·범위 최대 길이가 없다. 목록의 50건 제한(PA-05)은 캘린더에 적용되지 않으며 NFR-04는 '뷰 범위만 조회'까지만 정한다. → 결과 건수 상한·페이지 없음, 범위 최대 42일(초과 400), 정렬은 목록과 같은 `end_date, created_at, id`로 결정. |
 | AD-08 | 해결 | 목록의 카테고리 필터 ID가 없는 ID·타인 ID일 때 응답(404, 400, 빈 목록)이 없다. 카테고리 삭제 후 `todoFilterStore`에 삭제된 ID가 남으면 이 경우가 실제로 발생하므로 필터 초기화 시점(삭제 성공 시)도 정해야 한다(BR-02, LP-12). → 없는·타인 ID는 404 `NOT_FOUND`로 결정. 삭제 후 필터 초기화는 프론트(LP-12, 삭제 성공 시). |
-| AD-09 | 해결 | 카테고리 삭제와 동시에 그 카테고리로 할일을 등록·수정하는 경쟁 상황 처리가 없다(행 잠금 여부, `todos.category_id` FK의 ON DELETE 동작). DDL 문서에서 확정이 필요하다. → `7-erd.md` ER-04에서 `ON DELETE RESTRICT`, 행 잠금 없음으로 결정. 23503의 응답 코드는 API 명세에서 정한다. |
+| AD-09 | 해결 | 카테고리 삭제와 동시에 그 카테고리로 할일을 등록·수정하는 경쟁 상황 처리가 없다(행 잠금 여부, `todos.category_id` FK의 ON DELETE 동작). DDL 문서에서 확정이 필요하다. → `7-erd.md` ER-04에서 `ON DELETE RESTRICT`, 행 잠금 없음으로 결정. 23503의 응답 코드는 API 명세에서 정한다. → 카테고리 삭제 쪽 23503은 409 `CATEGORY_IN_USE`, 할일 등록·수정 쪽 FK 23503(`fk_todos_category_id_user_id`)은 404 `NOT_FOUND`로 구현(`categories.service.js`, `todos.service.js`). |
 | AD-10 | 해결 | 할일과 카테고리의 소유자 동일(도메인 3장)을 DB 제약(복합 FK 등)으로도 막을지, 서비스 검사(PP-18)만으로 둘지 NP-10에 없다. → `7-erd.md` ER-03에서 복합 FK로 결정. 서비스 검사(404 통일)는 유지. |
 | AD-11 | 해결 | 경로의 ID가 정수 형식이 아닐 때(예: `abc`) 400인지 404인지 없다. NFR-06의 '없는 ID와 동일한 404' 원칙과 FR-13 입력 검증이 충돌할 수 있다. → 정수가 아닌 경로 ID는 없는 ID와 같은 404 `NOT_FOUND`로 결정. |
-| AD-12 | 해결 | 5번 문서에 없는 항목: 미등록 경로 404, JSON 파싱 오류·본문 크기 초과(`express.json` limit)에 NP-15 형식을 적용하는지. `auth`와 `validate`의 순서도 명시가 없어 본 문서는 `auth` 먼저(미인증은 데이터 노출 없이 401, SN-03)로 그렸다. 미들웨어 등록 순서도 `app.js`에서 확정이 필요하다. → 미등록 경로는 404, JSON 파싱 오류·본문 크기 초과는 400 `VALIDATION_ERROR`(모두 NP-15 형식)로 결정(API 명세 D-10). `app.js` 등록 순서는 `cors → express.json → cookieParser → /api 라우터 → 404 → errorHandler`, 라우트 단위는 `auth → validate → controller`로 결정(8번 문서 D-10). |
+| AD-12 | 해결 | 5번 문서에 없는 항목: 미등록 경로 404, JSON 파싱 오류·본문 크기 초과(`express.json` limit)에 NP-15 형식을 적용하는지. `auth`와 `validate`의 순서도 명시가 없어 본 문서는 `auth` 먼저(미인증은 데이터 노출 없이 401, SN-03)로 그렸다. 미들웨어 등록 순서도 `app.js`에서 확정이 필요하다. → 미등록 경로는 404, JSON 파싱 오류·본문 크기 초과는 400 `VALIDATION_ERROR`(모두 NP-15 형식)로 결정(API 명세 D-10). `app.js` 등록 순서는 `cors → express.json → cookieParser → /api 라우터 → 404 → errorHandler`, 라우트 단위는 `auth → validate → controller`로 결정(8번 문서 D-10). 구현은 `x-powered-by` 비활성 → cors → express.json(100kb) → cookieParser → (development만) `/api/docs` → /api 라우터 → 404 → errorHandler이며, 4.1에 반영했다. |
 | AD-13 | 해결 | 로그아웃 API가 인증 미들웨어 뒤에 있는지(쿠키 만료 후 로그아웃 요청이 401이 되는 경우의 동작)가 없었다. → 인증 미들웨어 없이 `refresh_token` 쿠키로 처리하고 항상 204로 응답하는 것으로 결정(6.3 D). 로그아웃·401 시 서버 데이터 캐시를 비우는 규칙은 문서에 없어 E2E-02를 만족시키도록 6.3에 그렸다(5번 문서 LP에는 없음). |
 | AD-14 | 해결 | 5번 문서 2.1의 의존 방향 문장(`routes → controllers → ...`)에 `validators`가 없고 표에서만 '`routes`에서만 참조'로 나온다. 또 `validators`가 `domain`(날짜 문자열 검증)을 import하는 것이 문장에 명시되지 않았다. 본 문서는 `routes → validators`, `validators → domain`으로 그렸다. → `validators → domain` import를 허용하는 것으로 결정(8번 문서 D-10). 본 문서의 `routes → validators`, `validators → domain` 표기를 유지한다. |
-| AD-15 | 가정 | 이메일 중복 판정을 사전 조회가 아니라 고유 제약 위반(23505)을 409로 변환하는 방식으로 그렸다. 동시 가입에서도 안전하며 NP-10 제약과 일치한다. 구현 시 사전 조회를 추가해도 결과는 같다. |
+| AD-15 | 해결 | 이메일 중복 판정을 사전 조회가 아니라 고유 제약 위반(23505)을 409로 변환하는 방식으로 그렸다. 동시 가입에서도 안전하며 NP-10 제약과 일치한다. 구현 시 사전 조회를 추가해도 결과는 같다. → 사전 조회 없이 제약명 `uq_users_email`의 23505를 409 `EMAIL_ALREADY_EXISTS`(`fields.email`)로 변환하는 방식으로 구현(`auth.service.js`). |
 | AD-16 | 해결 | 로그인 시 만료 행 DELETE와 새 행 INSERT(6.2)를 하나의 트랜잭션으로 묶는지, 정리 DELETE 실패 시 로그인을 실패시키는지가 정해지지 않았다. 6.2는 두 문장을 순서대로 그렸다. → 묶지 않는다. 만료 행 정리 DELETE 실패는 경고 로그 후 로그인 계속, 새 행 INSERT 실패는 500(8번 문서 D-16). |
-| AD-17 | 미결 | single-flight는 한 탭 안에서만 갱신을 하나로 합친다. 같은 브라우저의 여러 탭이 동시에 갱신하면 먼저 처리된 요청이 행을 삭제하므로 나중 요청은 401(사용된 토큰)이 되어 그 탭만 세션 만료 안내로 이동할 수 있다. 재사용 탐지가 없어(PA-01) 계열 폐기로 번지지는 않는다. 허용 여부·유예 시간은 정해지지 않았다. |
+| AD-17 | 해결 | (8번 문서 D-17: 한계 수용, 탭 간 조정은 범위 밖) single-flight는 한 탭 안에서만 갱신을 하나로 합친다. 같은 브라우저의 여러 탭이 동시에 갱신하면 먼저 처리된 요청이 행을 삭제하므로 나중 요청은 401(사용된 토큰)이 되어 그 탭만 세션 만료 안내로 이동할 수 있다. 재사용 탐지가 없어(PA-01) 계열 폐기로 번지지는 않는다. 허용 여부·유예 시간은 정해지지 않았다. |

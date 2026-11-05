@@ -8,6 +8,7 @@
 | v0.2 | 2026-11-04 | jtaewu | 초안 | 인증 변경 반영: `refresh_tokens` 테이블 추가 |
 | v0.3 | 2026-11-04 | jtaewu | 초안 | 기준 문서 버전 갱신(5번 v0.3, 6번 v0.4) |
 | v0.4 | 2026-11-04 | jtaewu | 초안 | 기준 문서 버전 갱신 |
+| v0.5 | 2026-11-05 | jtaewu | 초안 | 구현(BE·DB Task 완료) 반영: 쿼리·트랜잭션 서술, ER-10·12 확정. 테이블·제약·인덱스 변경 없음 |
 
 ## 변경 이력
 
@@ -21,14 +22,21 @@
 | v0.2 | 2026-11-04 | 7장 | 추가 | ER-13(해시 저장), ER-14(절대 만료 이어받기), ER-15(재사용 탐지 없음), ER-16(정리 정책) | jtaewu |
 | v0.3 | 2026-11-04 | 머리말 | 수정 | 기준 문서 버전 갱신(5번 v0.3, 6번 v0.4). 테이블·제약·인덱스 변경 없음 | jtaewu |
 | v0.4 | 2026-11-04 | 머리말 | 수정 | 기준 문서 버전 갱신(PRD v0.6, 5번 v0.4, 6번 v0.5). ER-05가 PRD FR-06에 반영됨. 테이블·제약·인덱스 변경 없음 | jtaewu |
+| v0.5 | 2026-11-05 | 머리말 | 수정 | 기준 문서 버전 갱신(5번 v0.9, 6번 v0.10) | jtaewu |
+| v0.5 | 2026-11-05 | 1장 | 추가 | DDL 기준본 `docs/schema.sql`과 `0001_init.sql`의 관계 | jtaewu |
+| v0.5 | 2026-11-05 | 5장 | 수정 | 5.2 목록 쿼리의 OFFSET 페이지와 count 쿼리, 캘린더 정렬·상한 없음, 카테고리 조회가 쓰는 인덱스 | jtaewu |
+| v0.5 | 2026-11-05 | 6장 | 수정 | BR-08: 이름 변경 UPDATE에도 `is_default = false` 조건 | jtaewu |
+| v0.5 | 2026-11-05 | 7장 | 수정 | ER-04(23503 변환 구체화), ER-09(BR-10 이동도 updated_at 갱신), ER-10(러너가 생성, 확정), ER-11(변환 위치), ER-12(점검 완료), ER-14(만료 판정 시각), ER-16(D-16 반영) | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.6), `5-project-principle.md`(v0.4), `6-arch-diagram.md`(v0.5)를 기준으로 한다. 규칙(BR)·요구사항(FR/NFR)은 재정의하지 않고 ID로 참조한다. 네이밍·타입은 5번 문서 NP-08~10, NP-18, PP-07을 따른다.
+> 본 문서는 `1-domain-definition.md`(v0.4), `2-PRD.md`(v0.7), `5-project-principle.md`(v0.9), `6-arch-diagram.md`(v0.10)를 기준으로 한다. 규칙(BR)·요구사항(FR/NFR)은 재정의하지 않고 ID로 참조한다. 네이밍·타입은 5번 문서 NP-08~10, NP-18, PP-07을 따른다.
 
 ## 1. 개요
 
 **범위:** PostgreSQL 17 테이블 4개(`users`, `categories`, `todos`, `refresh_tokens`)와 마이그레이션 이력 테이블 1개(`schema_migrations`, SP-11). `pg`로 SQL을 직접 작성하고 순번 SQL 마이그레이션으로 적용한다(ORM 없음). DDL 파일 자체는 `backend/migrations/`에서 작성한다.
+
+전체 DDL 기준본은 `docs/schema.sql`이며 `backend/migrations/0001_init.sql`과 결과가 같다(8번 문서 DB-02).
 
 **고정 원칙:**
 - 상태(status)는 저장하지 않는다. 저장 값은 `is_completed`뿐이다(BR-13).
@@ -198,11 +206,11 @@ NP-10 네이밍(`<접두>_<테이블>_<컬럼>`)을 따른다. PK 이름은 Post
 
 | 이름 | 테이블 | 컬럼 | 받치는 쿼리 | 근거 |
 |------|--------|------|-------------|------|
-| `idx_todos_user_id_end_date_created_at_id` | todos | (user_id, end_date, created_at, id) | ① 목록: `WHERE user_id = $1 [AND category_id/상태 조건] ORDER BY end_date, created_at, id LIMIT 50`. ② 캘린더 기간 겹침: `WHERE user_id = $1 AND start_date <= 범위끝 AND end_date >= 범위시작`은 `end_date >= 범위시작`으로 스캔 범위를 좁히고 `start_date`는 필터로 적용 | FR-06, FR-10, NFR-04, PA-05, ER-05, ER-07 |
+| `idx_todos_user_id_end_date_created_at_id` | todos | (user_id, end_date, created_at, id) | ① 목록: `WHERE user_id = $1 [AND category_id = $n] [AND 상태 조건] ORDER BY end_date, created_at, id LIMIT 50 OFFSET (page-1)*50`(offset 페이지)과, 같은 WHERE의 `count(*)`(totalCount). 상태 조건(`is_completed`, 날짜와 `today` 비교)은 인덱스 스캔 뒤 필터로 적용한다. ② 캘린더 기간 겹침: `WHERE user_id = $1 AND start_date <= 범위끝 AND end_date >= 범위시작`은 `end_date >= 범위시작`으로 스캔 범위를 좁히고 `start_date`는 필터로 적용. 정렬 `ORDER BY end_date, created_at, id`는 인덱스 순서와 같고 결과 상한은 없다(AD-07) | FR-06, FR-10, NFR-04, PA-05, ER-05, ER-07 |
 | `idx_todos_user_id_category_id` | todos | (user_id, category_id) | 카테고리 필터, BR-10 이동 `UPDATE ... WHERE user_id AND category_id`, 카테고리 삭제 시 FK 참조 검사(없으면 전체 스캔) | FR-06, BR-10, NFR-04, PA-07 |
 | `idx_refresh_tokens_user_id` | refresh_tokens | (user_id) | 로그인 시 그 사용자의 만료 행 정리 `DELETE ... WHERE user_id = $1 AND expires_at <= now()`, FK 참조 검사 | PA-01, ER-16 |
 
-`uq_users_email`, `uq_categories_user_id_name`(user_id 선두)도 각각 로그인 조회, 사용자별 카테고리 목록 조회를 받친다. 상태 필터(완료·기한 초과·시작 전·진행중)는 사용자 단위 행 수(PA-07: 200건)가 작아 별도 인덱스를 두지 않는다(ER-07).
+`uq_users_email`은 로그인 조회(`WHERE email = $1`)를, `uq_categories_user_id_name`(user_id 선두)은 사용자별 카테고리 목록(`WHERE user_id = $1 ORDER BY id`)을, `uq_categories_user_id_default`는 기본 카테고리 조회(`WHERE user_id = $1 AND is_default = true`)를 받친다. id로 찾는 단건 조회는 `WHERE id = $1 AND user_id = $2`로 PK를 쓴다. 상태 필터(완료·기한 초과·시작 전·진행중)는 사용자 단위 행 수(PA-07: 200건)가 작아 별도 인덱스를 두지 않는다(ER-07).
 
 ## 6. 규칙 → DB 보장 매핑
 
@@ -217,7 +225,7 @@ DB = DB 제약이 보장, 서비스 = 서비스 로직(및 zod)이 보장. '병�
 | BR-05 | 종료일 ≥ 시작일 | 병행 | `ck_todos_end_date_gte_start_date` + zod |
 | BR-06 | 가입 시 기본 카테고리 생성 | 서비스 | 가입 트랜잭션(LP-03). DB는 기본이 2개 이상 되는 것만 차단, 0개는 못 막음(ER-12) |
 | BR-07 | 카테고리 미지정 시 기본에 속함 | 서비스 | 기본 카테고리 조회 후 INSERT/UPDATE. DB는 `category_id NOT NULL`로 미소속 저장만 차단 |
-| BR-08 | 기본 카테고리 삭제·이름 변경 불가 | 서비스 | `is_default` 확인 후 409, DELETE에 `is_default = false` 조건. DB 제약으로는 불가(트리거 미도입) |
+| BR-08 | 기본 카테고리 삭제·이름 변경 불가 | 서비스 | `is_default` 확인 후 409. 이름 변경 UPDATE와 DELETE 모두 `WHERE ... AND is_default = false` 조건을 둔다. DB 제약으로는 불가(트리거 미도입) |
 | BR-09 | 사용자 내 카테고리 이름 고유 | DB | `uq_categories_user_id_name` (서비스는 23505 → 409 변환) |
 | BR-10 | 삭제 시 소속 할일을 기본으로 이동 | 서비스 + DB 안전망 | 이동 UPDATE → DELETE를 한 트랜잭션으로(6번 문서 6.6). `ON DELETE RESTRICT`가 이동 누락·경쟁 시 할일 소실 대신 실패시킴(ER-04) |
 | BR-11 | 할일 영구 삭제 | 서비스 | 물리 `DELETE`. soft delete 컬럼 없음. 확인 절차는 UI |
@@ -233,16 +241,16 @@ DB = DB 제약이 보장, 서비스 = 서비스 로직(및 zod)이 보장. '병�
 | ER-01 | 가정 | AS-08 길이는 `varchar(n)`(제목 100, 메모 1000, 카테고리 이름 20, 사용자 이름 50)으로 최대치만 DB가 강제하고, 별도 길이 CHECK는 두지 않는다. 이유: 세부값이 '구현 단계 확정'(AS-08)이라 변경 시 타입 변경 하나로 끝나고, 최소 길이·공백은 서버 zod가 담당(FR-13). 길이는 글자 수 기준이다. |
 | ER-02 | 가정 | 이메일은 `varchar(255)`(일반적 상한, 문서 근거 없는 추정)이며 소문자 정규화는 서비스(PP-08), `ck_users_email_lower`는 누락 방어용이다. 일반 UNIQUE로 충분해 `citext`·`lower()` 인덱스는 쓰지 않는다. |
 | ER-03 | 가정 (**AD-10 결정**) | 할일·카테고리 소유자 일치를 복합 FK `(category_id, user_id) → categories(id, user_id)`로 DB가 보장한다. 이를 위해 `uq_categories_id_user_id`를 추가한다. 이유: DDL 몇 줄로 PP-18의 서비스 검사가 뚫려도 타인 카테고리 참조가 저장되지 않는다. 서비스 검사(404 통일, NP-16)는 그대로 유지한다. `fk_todos_user_id`는 복합 FK로 간접 보장되지만 의도 명시를 위해 둔다. |
-| ER-04 | 가정 (**AD-09 결정**) | `todos → categories` FK는 `ON DELETE RESTRICT`다(CASCADE는 BR-10 위반, SET NULL은 NOT NULL과 충돌). 정상 경로는 서비스가 이동 후 삭제한다. 삭제와 동시에 같은 카테고리로 할일을 등록·수정하면 한쪽이 FK 위반(23503)으로 실패하고 롤백되어 할일은 사라지지 않는다. 별도 행 잠금은 두지 않으며, 서비스는 23503을 404/409 중 하나로 변환한다(코드는 API 명세, 6번 문서 AD-04 계열). |
+| ER-04 | 가정 (**AD-09 결정**) | `todos → categories` FK는 `ON DELETE RESTRICT`다(CASCADE는 BR-10 위반, SET NULL은 NOT NULL과 충돌). 정상 경로는 서비스가 이동 후 삭제한다. 삭제와 동시에 같은 카테고리로 할일을 등록·수정하면 한쪽이 FK 위반(23503)으로 실패하고 롤백되어 할일은 사라지지 않는다. 별도 행 잠금은 두지 않으며, 서비스는 23503을 다음과 같이 변환한다. 할일 등록·수정에서 `fk_todos_category_id_user_id` 위반이면(카테고리가 먼저 삭제됨) 404 `NOT_FOUND`, 카테고리 삭제 트랜잭션에서 위반이면(이동 뒤 새 할일이 참조) 409 `CATEGORY_IN_USE`(재시도 안내). |
 | ER-05 | 가정 (**AD-06 결정**) | 정렬 동점은 `id` 오름차순을 3순위로 추가한다: `ORDER BY end_date, created_at, id`(FR-06 확장). 이유: 페이지 경계 중복·누락 방지, 컬럼 추가 없이 가능. 인덱스 끝에 `id`를 포함한다. |
 | ER-06 | 가정 | 사용자 FK는 `ON DELETE RESTRICT`다. 사용자 삭제는 범위 밖(OQ-01)이므로 CASCADE 등 탈퇴 시 데이터 처리 동작을 정하지 않는다. 탈퇴를 도입하면 재결정한다. |
 | ER-07 | 가정 | 캘린더 겹침 조회는 별도 인덱스 없이 `idx_todos_user_id_end_date_created_at_id`를 쓴다(사용자당 약 200건, PA-07). 부하 테스트(NFR-01, R-02)에서 미달하면 `(user_id, start_date, end_date)` 인덱스를 추가한다. 캘린더 결과 상한·범위 최대 길이는 6번 문서 AD-07 소관이며 여기서 정하지 않는다. |
 | ER-08 | 가정 | 카테고리 이름 고유는 대소문자·공백을 구분하는 정확 일치다. 앞뒤 공백 제거는 서비스(zod)가 한다. 기본 카테고리 이름 '기본'도 같은 고유 제약을 받아 사용자가 같은 이름을 만들 수 없다. |
-| ER-09 | 가정 | `updated_at`은 트리거 없이 서비스의 UPDATE 문이 `now()`로 설정한다(트리거 미도입, CP-01). 서버 시계는 시각 기록에 쓸 수 있다(NP-22). |
-| ER-10 | 가정 | `schema_migrations`는 `filename`(PK), `applied_at` 두 컬럼이다. 5번 문서 SP-11은 '적용 이력'까지만 정하므로 컬럼 구성은 본 문서의 가정이며 러너 구현 시 확정한다. |
-| ER-11 | 가정 | 메모가 없으면 빈 문자열이 아니라 NULL로 저장한다(서비스가 빈 값을 NULL로 변환). |
-| ER-12 | 미결 | '사용자당 기본 카테고리 최소 1개'(BR-06)는 DB로 보장하지 못한다(부분 고유 인덱스는 최대 1개만 보장). 지연 제약 트리거는 도입하지 않고 가입 트랜잭션에 의존한다. 가입 외 경로로 기본 카테고리가 없는 사용자가 생길 수 있는지는 구현 시 점검한다. |
+| ER-09 | 가정 | `updated_at`은 트리거 없이 서비스의 UPDATE 문이 `now()`로 설정한다(트리거 미도입, CP-01). 서버 시계는 시각 기록에 쓸 수 있다(NP-22). 할일 수정, 완료 처리, BR-10 이동 UPDATE가 `updated_at`을 갱신한다. |
+| ER-10 | 해결 | `schema_migrations`는 `filename`(PK), `applied_at` 두 컬럼이다(DB-01에서 확정, 8번 문서 D-15). 이 테이블은 마이그레이션 파일이 아니라 러너(`scripts/migrate.js`)가 `CREATE TABLE IF NOT EXISTS`로 만든다. 러너는 `NNNN_*.sql`을 이름순으로 읽어 파일마다 트랜잭션 하나에서 본문 실행과 이력 INSERT를 함께 커밋하므로, 마이그레이션 파일에는 `BEGIN`/`COMMIT`을 쓰지 않는다. |
+| ER-11 | 가정 | 메모가 없거나 빈 문자열이면 NULL로 저장한다(repository에서 `memo || null`). 공백만 있는 메모는 trim하지 않고 그대로 저장한다. |
+| ER-12 | 해결 | '사용자당 기본 카테고리 최소 1개'(BR-06)는 DB로 보장하지 못한다(부분 고유 인덱스는 최대 1개만 보장). 지연 제약 트리거는 두지 않는다. 점검 결과 기본 카테고리를 만드는 경로는 가입 트랜잭션과 부하 테스트 시드뿐이고, `is_default`를 바꾸는 UPDATE는 없으며, 기본 카테고리 이름 변경·삭제는 `is_default = false` 조건으로 막힌다(BE-15 점검 테스트). |
 | ER-13 | 가정 | Refresh Token은 SHA-256 해시(hex 64자, `char(64)`)만 저장하고 원문은 저장하지 않는다. 이유: DB가 유출되어도 토큰을 재사용할 수 없고, 토큰이 `randomBytes(32)`의 고엔트로피 값이라 솔트·느린 해시가 필요 없다. 해시 값은 `uq_refresh_tokens_token_hash`로 고유하다. |
-| ER-14 | 가정 | `expires_at`은 로그인 시점부터 7일이며 갱신(rotation) 시 새 행이 기존 행의 `expires_at`을 그대로 이어받는다. 이유: 로그인 후 최대 7일이라는 절대 만료를 유지한다(슬라이딩 연장 없음). 갱신 시 기존 행 `DELETE ... RETURNING`과 새 행 INSERT는 한 트랜잭션이다(6번 문서 6.9). |
+| ER-14 | 가정 | `expires_at`은 로그인 시점부터 7일이며 갱신(rotation) 시 새 행이 기존 행의 `expires_at`을 그대로 이어받는다. 이유: 로그인 후 최대 7일이라는 절대 만료를 유지한다(슬라이딩 연장 없음). 갱신 시 기존 행 `DELETE ... RETURNING`과 새 행 INSERT는 한 트랜잭션이다(6번 문서 6.9). 갱신 DELETE는 `expires_at > 앱 서버 현재 시각` 조건으로 유효한 행만 소비하므로, 만료된 행은 남아 ER-16 정리 대상이 된다. |
 | ER-15 | 가정 | 재사용 탐지(토큰 계열 전체 폐기)를 하지 않는다. 이미 사용된 Refresh Token은 행이 없어 401이 될 뿐이며, 이를 위한 계열 식별 컬럼·상태 컬럼은 두지 않는다(PA-01 한계). |
-| ER-16 | 가정 | 만료된 `refresh_tokens` 행의 정리는 그 사용자가 로그인할 때 DELETE하는 것뿐이다. 다시 로그인하지 않는 사용자의 만료 행은 남는다. 별도 정리 작업은 두지 않는다. |
+| ER-16 | 가정 | 만료된 `refresh_tokens` 행의 정리는 그 사용자가 로그인할 때 DELETE하는 것뿐이다. 다시 로그인하지 않는 사용자의 만료 행은 남는다. 별도 정리 작업은 두지 않는다. 정리 DELETE(`expires_at <= now()`, DB 시각)와 새 행 INSERT는 한 트랜잭션으로 묶지 않으며, 정리가 실패해도 경고 로그만 남기고 로그인은 계속한다(8번 문서 D-16). |
