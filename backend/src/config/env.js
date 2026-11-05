@@ -9,10 +9,24 @@ export const envSchema = z.object({
   DB_POOL_MAX: z.coerce.number().int().min(1).default(10),
   JWT_SECRET: z.string().min(64),
   BCRYPT_COST: z.coerce.number().int().min(4).max(31).default(10),
-  FRONTEND_ORIGIN: z.url().default('http://localhost:5173'),
+  // 쉼표로 여러 출처. cors는 문자열 완전 일치로 비교하므로 경로·끝 슬래시 없는 출처 형식만 허용
+  FRONTEND_ORIGIN: z
+    .string()
+    .default('http://localhost:5173')
+    .transform((s) =>
+      s
+        .split(',')
+        .map((o) => o.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.string().refine((o) => URL.canParse(o) && new URL(o).origin === o)).min(1)),
 });
 
 export function parseEnv(source) {
+  // 운영에서 개발 기본값(localhost)으로 조용히 뜨지 않게 한다
+  if (source.NODE_ENV === 'production' && !source.FRONTEND_ORIGIN?.trim()) {
+    throw new Error('환경 변수 오류: FRONTEND_ORIGIN');
+  }
   const result = envSchema.safeParse(source);
   if (!result.success) {
     const names = [...new Set(result.error.issues.map((i) => i.path.join('.')))].join(', ');

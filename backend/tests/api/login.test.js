@@ -139,6 +139,23 @@ describe('로그인 시도 제한 (D-07)', () => {
     expect(res.body.error.code).toBe('TOO_MANY_ATTEMPTS');
   });
 
+  it('동시 요청 30개도 5개만 비밀번호를 검사하고 나머지는 429', async () => {
+    const { body } = await signup(app);
+    const res = await Promise.all(
+      Array.from({ length: 30 }, () => login(app, body.email, 'wrongpassword')),
+    );
+    const statuses = res.map((r) => r.res.status);
+    expect(statuses.filter((s) => s === 401)).toHaveLength(5);
+    expect(statuses.filter((s) => s === 429)).toHaveLength(25);
+  });
+
+  it('5번째 시도가 정답이면 200이고 차단되지 않는다', async () => {
+    const { body } = await signup(app);
+    for (let i = 0; i < 4; i++) await login(app, body.email, 'wrongpassword');
+    expect((await login(app, body.email, PW)).res.status).toBe(200);
+    expect((await login(app, body.email, 'wrongpassword')).res.status).toBe(401);
+  });
+
   it('5분 경과 후 성공', async () => {
     const { body } = await signup(app);
     vi.useFakeTimers({ toFake: ['Date'] });

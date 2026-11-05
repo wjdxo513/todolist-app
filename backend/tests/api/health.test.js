@@ -40,6 +40,16 @@ describe('CORS (NFR-10)', () => {
     const res = await request(app).get('/api/health').set('Origin', 'http://evil.example');
     expect(res.headers['access-control-allow-origin']).toBeUndefined();
   });
+
+  it('FRONTEND_ORIGIN에 쉼표로 지정한 출처를 각각 허용', async () => {
+    vi.stubEnv('FRONTEND_ORIGIN', `${ORIGIN},https://app.example.com`);
+    const multi = createApp();
+    vi.unstubAllEnvs();
+    for (const origin of [ORIGIN, 'https://app.example.com']) {
+      const res = await request(multi).get('/api/health').set('Origin', origin);
+      expect(res.headers['access-control-allow-origin']).toBe(origin);
+    }
+  });
 });
 
 describe('공통 오류 응답 (D-10, NP-15)', () => {
@@ -65,5 +75,26 @@ describe('공통 오류 응답 (D-10, NP-15)', () => {
       .send({ a: 'x'.repeat(110 * 1024) });
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
+  });
+});
+
+describe('Swagger UI /api/docs (개발 환경 전용)', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('development에서는 문서 화면과 명세를 제공한다', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    const dev = createApp();
+    const page = await request(dev).get('/api/docs/');
+    expect(page.status).toBe(200);
+    expect(page.text).toContain('swagger-ui');
+    const init = await request(dev).get('/api/docs/swagger-ui-init.js');
+    expect(init.text).toContain('/api/health');
+  });
+
+  it.each(['test', 'production'])('%s에서는 404', async (env) => {
+    vi.stubEnv('NODE_ENV', env);
+    const res = await request(createApp()).get('/api/docs/');
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('NOT_FOUND');
   });
 });

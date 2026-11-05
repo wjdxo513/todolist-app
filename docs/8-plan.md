@@ -15,6 +15,8 @@
 | v0.9 | 2026-11-04 | jtaewu | 초안 | BE-02·BE-03·BE-04 완료, D-10 해결, D-15 일부 해결 |
 | v0.10 | 2026-11-04 | jtaewu | 초안 | D-07·D-16·D-18 해결, BE-05~BE-09 완료 |
 | v0.11 | 2026-11-04 | jtaewu | 초안 | BE-10~BE-17·DB-03 완료(백엔드 Task 전부), D-15 PA-07 해결 |
+| v0.12 | 2026-11-05 | jtaewu | 초안 | 코드 검토 반영: D-15 비밀번호 최대 UTF-8 72바이트 |
+| v0.13 | 2026-11-05 | jtaewu | 초안 | 개발·운영 CORS 방식 반영(5번 v0.8 PP-12, 6번 v0.9) |
 
 ## 변경 이력
 
@@ -52,10 +54,13 @@
 | v0.10 | 2026-11-04 | 6장 | 수정 | BE-05~BE-09 완료 조건 체크(테스트 180건 통과, 커버리지 문장·줄 100%, 분기 98.4%) | jtaewu |
 | v0.11 | 2026-11-04 | 6장 | 수정 | BE-10~BE-17·DB-03 완료 조건 체크(테스트 315건 통과, 커버리지 문장·줄·함수 100%, 분기 99.5%) | jtaewu |
 | v0.11 | 2026-11-04 | 9장 | 수정 | D-15 중 PA-07 카테고리 5개에 기본 포함으로 해결, 남은 것은 FE `limits.ts` | jtaewu |
+| v0.12 | 2026-11-05 | 9장 | 수정 | D-15 비밀번호 최대 UTF-8 72바이트(bcrypt 한계) 추가 | jtaewu |
+| v0.13 | 2026-11-05 | 머리말 | 수정 | 기준 문서 버전 갱신(5번 v0.8, 6번 v0.9) | jtaewu |
+| v0.13 | 2026-11-05 | 6·9장 | 수정 | FE-01 `vite.config.ts` 프록시 삭제·`VITE_API_BASE_URL` 절대 URL, INT-02 선행·D-12 문구를 CORS 구성으로 변경 | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.6), `3-user-scenario.md`(v0.5), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.7), `6-arch-diagram.md`(v0.8), `7-erd.md`(v0.4), `schema.sql`을 기준으로 한다. 규칙·요구사항·화면은 재정의하지 않고 ID(FR/NFR/BR/SN/E2E/ST/CV/WA/TP/SP/ER/AD/PP 등)로 참조한다.
+> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.6), `3-user-scenario.md`(v0.5), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.8), `6-arch-diagram.md`(v0.9), `7-erd.md`(v0.4), `schema.sql`을 기준으로 한다. 규칙·요구사항·화면은 재정의하지 않고 ID(FR/NFR/BR/SN/E2E/ST/CV/WA/TP/SP/ER/AD/PP 등)로 참조한다.
 
 ## 1. 개요와 Task 표기 규칙
 
@@ -778,7 +783,7 @@ FE Task는 모두 `/develop-frontend`로 수행하며, 네트워크는 MSW로 �
 
 **수행 작업**
 
-- Vite + React 19 + TypeScript(`strict`), `package.json`(5번 문서 2.4 허용 목록만, 스크립트 `dev`·`test`·`test:coverage`·`lint`·`format`), `eslint.config.js`(`any` 금지, react-hooks, 계층 import 제한), `vitest.config.ts`(jsdom, `TZ` 비UTC, 커버리지 `thresholds` 90%, `main.tsx` 제외), `vite.config.ts`(`/api` 프록시, PP-03), `.env.example`(`VITE_API_BASE_URL`).
+- Vite + React 19 + TypeScript(`strict`), `package.json`(5번 문서 2.4 허용 목록만, 스크립트 `dev`·`test`·`test:coverage`·`lint`·`format`), `eslint.config.js`(`any` 금지, react-hooks, 계층 import 제한), `vitest.config.ts`(jsdom, `TZ` 비UTC, 커버리지 `thresholds` 90%, `main.tsx` 제외), `vite.config.ts`(프록시 없음, PP-03), `.env.example`(`VITE_API_BASE_URL=http://localhost:3000/api`, CORS PP-12).
 - `src/test/`: `setup.ts`, `server.ts`(MSW), `handlers.ts`, `renderWithProviders.tsx`(QueryClient 새 인스턴스, 라우터, 스토어 초기화).
 
 **완료 조건**
@@ -1214,7 +1219,7 @@ FE Task는 모두 `/develop-frontend`로 수행하며, 네트워크는 MSW로 �
 - [ ] 임계치 미달로 조정한 항목이 있으면 조정 내용과 재측정 통과 결과가 스크립트 주석 또는 5번 문서 PP 갱신으로 기록되어 있다
 - [ ] 단위·통합 테스트 실행(`npm test`)에 `loadtest/`가 포함되지 않는다(TP-08)
 
-**선행 Task:** BE-15, DB-03 (D-12: 같은 출처 진입점 구성)
+**선행 Task:** BE-15, DB-03 (D-12: 프론트·API 출처 구성)
 
 **근거:** NFR-01~04, PA-03, PA-07, TP-08, R-02, R-03, G-03
 
@@ -1256,10 +1261,10 @@ FE Task는 모두 `/develop-frontend`로 수행하며, 네트워크는 MSW로 �
 | D-09 | AD-08 | **해결.** 없는·타인 ID는 404 `NOT_FOUND`, 필터 초기화는 삭제 성공 시 프론트(LP-12) | BE-13, FE-09, FE-11 | 해결 |
 | D-10 | AD-11, AD-12, AD-14 | **해결.** 경로 ID 형식 오류·미등록 경로 404, JSON 파싱 오류·본문 초과(100kb) 400 `VALIDATION_ERROR`(NP-15 형식, API 명세). `app.js` 등록 순서는 `cors → express.json → cookieParser → /api 라우터 → 404 → errorHandler`, 라우트 단위는 `auth → validate → controller`. `validators → domain` import 허용(BE-03) | BE-01(ESLint 규칙), BE-03, BE-04, BE-09~BE-12 | 해결 |
 | D-11 | AD-13                             | **해결.** 로그아웃 API는 인증 미들웨어 없이 `refresh_token` 쿠키로 행을 삭제하고 항상 204로 응답한다(BE-07). 로그아웃·갱신 실패 시 서버 데이터 캐시 비움은 FE-03·FE-07 완료 조건으로 확정                                                | BE-07, FE-07 (반영 완료)                      | 해결            |
-| D-12 | AD-02                             | 프론트 정적 자원 제공 주체(리버스 프록시/Express), TLS 종단 위치. 이 계획에는 배포 Task가 없다                                                                                                                              | INT-02(부하 시 진입점 구성)                   | INT-02 전       |
+| D-12 | AD-02                             | 프론트 정적 자원 호스팅 방식, TLS 종단 위치(프론트·API는 같은 사이트의 다른 출처, CORS, PP-12). 이 계획에는 배포 Task가 없다                                                                                                                        | INT-02(부하 시 진입점 구성)                   | INT-02 전       |
 | D-13 | 문서 없음(신규 발견)              | 캘린더 화면 진입 시 초기 뷰(월/주/일)                                                                                                                                                                                       | FE-03, FE-14                                  | FE-03 전        |
 | D-14 | SA-01~11, WA-01~24                | SA/WA 가정의 확정. 구현에 직접 영향: SA-03(차단 집계) → BE-07, WA-03(로그인 실패·차단 문구, 구현 단계 확정) → FE-06, WA-18(`[+N건]` 표시 한도 값) → FE-13·15·16, WA-23(768px 경계) → FE-04·INT-03, WA-24(날짜 표기) → FE-11 | 좌측 열 Task                                  | 각 Task 전      |
-| D-15 | AS-08, PP-20, PP-10, ER-10, PA-07 | 구현 단계 확정 값. **해결:** AS-08 세부 길이는 schema.sql `varchar`와 같게(제목 100, 메모 1000, 카테고리 이름 20, 사용자 이름 50, 비밀번호 최소 8, BE `limits.js`), bcrypt는 설치·동작 확인, `schema_migrations`는 `filename`·`applied_at`(DB-01), PA-07 '카테고리 5개'는 기본 포함(기본 1 + 일반 4, DB-03 `seed-loadtest.js`). **미결:** FE `limits.ts` 동일 유지(FE-02) | BE-03, FE-02, BE-05, DB-01, DB-03 | FE-02 전 |
+| D-15 | AS-08, PP-20, PP-10, ER-10, PA-07 | 구현 단계 확정 값. **해결:** AS-08 세부 길이는 schema.sql `varchar`와 같게(제목 100, 메모 1000, 카테고리 이름 20, 사용자 이름 50, 비밀번호 최소 8·최대 UTF-8 72바이트(bcrypt 한계), BE `limits.js`), bcrypt는 설치·동작 확인, `schema_migrations`는 `filename`·`applied_at`(DB-01), PA-07 '카테고리 5개'는 기본 포함(기본 1 + 일반 4, DB-03 `seed-loadtest.js`). **미결:** FE `limits.ts` 동일 유지(FE-02) | BE-03, FE-02, BE-05, DB-01, DB-03 | FE-02 전 |
 | D-16 | AD-16 | **해결.** 묶지 않는다. 만료 행 정리 DELETE 실패는 경고 로그 후 로그인 계속, 새 행 INSERT 실패는 500 | BE-07 | 해결 |
 | D-17 | AD-17 | 여러 탭이 동시에 토큰을 갱신하면 늦은 탭이 401을 받아 세션 만료 화면으로 이동할 수 있음(single-flight는 탭 단위) | FE-02 | FE-02 전 |
 | D-18 | PRD OQ-03, PP-23 | **해결.** 폐기하지 않는다(다른 기기 로그인 유지, 쿠키 재발급 없음) | BE-08 | 해결 |

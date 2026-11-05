@@ -40,8 +40,32 @@ describe('parseEnv', () => {
       LOG_LEVEL: 'info',
       DB_POOL_MAX: 10,
       BCRYPT_COST: 10,
-      FRONTEND_ORIGIN: 'http://localhost:5173',
+      FRONTEND_ORIGIN: ['http://localhost:5173'],
     });
+  });
+
+  it('FRONTEND_ORIGIN은 쉼표로 여러 출처를 받고 공백·빈 항목을 무시', () => {
+    const env = parseEnv({
+      ...base,
+      FRONTEND_ORIGIN: ' http://localhost:5173, https://app.example.com ,',
+    });
+    expect(env.FRONTEND_ORIGIN).toEqual(['http://localhost:5173', 'https://app.example.com']);
+  });
+
+  it.each(['not-a-url', 'https://app.example.com/', 'https://app.example.com/path', ','])(
+    'FRONTEND_ORIGIN=%s 는 throw',
+    (value) => {
+      expect(() => parseEnv({ ...base, FRONTEND_ORIGIN: value })).toThrow('FRONTEND_ORIGIN');
+    },
+  );
+
+  it('운영에서 FRONTEND_ORIGIN 누락·빈값은 throw, 지정하면 성공', () => {
+    const prod = { ...base, NODE_ENV: 'production' };
+    expect(() => parseEnv(prod)).toThrow('FRONTEND_ORIGIN');
+    expect(() => parseEnv({ ...prod, FRONTEND_ORIGIN: '  ' })).toThrow('FRONTEND_ORIGIN');
+    expect(
+      parseEnv({ ...prod, FRONTEND_ORIGIN: 'https://app.example.com' }).FRONTEND_ORIGIN,
+    ).toEqual(['https://app.example.com']);
   });
 });
 

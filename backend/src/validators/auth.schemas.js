@@ -9,7 +9,9 @@ export const email = z
   .pipe(z.email('이메일 형식이 올바르지 않습니다.'));
 export const newPassword = z
   .string()
-  .min(LIMITS.PASSWORD_MIN, `비밀번호는 ${LIMITS.PASSWORD_MIN}자 이상이어야 합니다.`);
+  .min(LIMITS.PASSWORD_MIN, `비밀번호는 ${LIMITS.PASSWORD_MIN}자 이상이어야 합니다.`)
+  // bcrypt는 72바이트 이후를 무시한다
+  .refine((s) => Buffer.byteLength(s) <= LIMITS.PASSWORD_MAX_BYTES, '비밀번호가 너무 깁니다.');
 export const userName = z
   .string()
   .trim()

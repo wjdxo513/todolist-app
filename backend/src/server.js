@@ -9,6 +9,8 @@ const server = createApp().listen(env.PORT, () =>
 );
 
 function shutdown(signal) {
+  // 두 번째 신호(종류 무관)는 기본 동작인 즉시 종료로 둔다. pool.end() 이중 호출 방지.
+  process.removeAllListeners('SIGTERM').removeAllListeners('SIGINT');
   logger.info({ signal }, 'shutting down');
   server.close(async () => {
     await pool.end();

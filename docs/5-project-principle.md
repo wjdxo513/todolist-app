@@ -11,6 +11,7 @@
 | v0.5 | 2026-11-04 | jtaewu | 초안 | DB 연결 환경 변수 이름을 `DB_CONN_STRING`으로 변경 |
 | v0.6 | 2026-11-04 | jtaewu | 초안 | PRE-01·PRE-02 반영: PP-11·14·15·21 해결 |
 | v0.7 | 2026-11-04 | jtaewu | 초안 | PP-23 해결, PP-09 실패 기록 정리 정책 추가 |
+| v0.8 | 2026-11-05 | jtaewu | 초안 | 개발·운영 모두 CORS 방식으로 변경(프록시 미사용), PP-12 해결 |
 
 ## 변경 이력
 
@@ -33,6 +34,7 @@
 | v0.6 | 2026-11-04 | 6장 | 수정 | frontend `styles/` 설명을 스타일 가이드 기준으로 변경 | jtaewu |
 | v0.6 | 2026-11-04 | 7장 | 수정 | PP-11·PP-14·PP-21 해결(API 명세 `backend/swagger.yaml` v0.2), PP-15 해결(`9-style-guide.md`) | jtaewu |
 | v0.7 | 2026-11-04 | 7장 | 수정 | PP-23 해결(다른 기기 Refresh 폐기 안 함, D-18), PP-09에 실패 기록 정리 정책(D-07) | jtaewu |
+| v0.8 | 2026-11-05 | 5·7장 | 수정 | SP-07·PP-03·PP-12·`VITE_API_BASE_URL`: 같은 출처/Vite 프록시 → 개발·운영 CORS(같은 사이트, 다른 출처). `FRONTEND_ORIGIN` 쉼표 다중 출처·운영 필수 | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
@@ -223,7 +225,7 @@
 | SP-04 | 비밀번호는 `bcrypt`로만 저장·비교한다. 평문을 저장·로그·응답에 쓰지 않는다. 없는 이메일 로그인에도 더미 해시 비교를 수행해 응답 시간 차로 존재 여부가 드러나지 않게 한다. | PA-02, NFR-05, FR-02 |
 | SP-05 | SQL 값은 파라미터 바인딩(`$n`)만 쓴다. 문자열 연결·템플릿 삽입 금지. 정렬 컬럼 등 동적 식별자가 필요하면 코드 내 화이트리스트 매핑만 허용한다. | NFR-07 |
 | SP-06 | 사용자 데이터를 읽거나 바꾸는 모든 쿼리의 WHERE에 `user_id = $n`(소유자 조건)을 포함한다. `id`만으로 조회·수정·삭제하는 쿼리를 만들지 않는다. | BR-02, NFR-06 |
-| SP-07 | CORS는 `FRONTEND_ORIGIN` 하나만 허용하고 `credentials: true`로 한다. 인증 쿠키는 `SameSite=Lax`이므로 프론트와 API는 같은 사이트에서 서비스한다(PP-12). 본문 크기는 제한(`express.json` limit)하고 `x-powered-by`를 끈다. | NFR-10 |
+| SP-07 | 개발·운영 모두 프론트는 CORS로 API를 직접 호출한다(프록시 미사용, PP-12). CORS는 `FRONTEND_ORIGIN`에 지정한 출처만 허용하고 `credentials: true`로 한다. 인증 쿠키는 `SameSite=Lax`이므로 프론트와 API는 같은 사이트의 서로 다른 출처로 둔다(PP-12). 본문 크기는 제한(`express.json` limit)하고 `x-powered-by`를 끈다. | NFR-10 |
 | SP-08 | 로그인 시도 제한: 이메일(소문자 정규화) 단위로 연속 5회 실패 시 5분 차단, 성공 시 초기화, 없는 이메일도 같은 방식으로 집계, 차단 중에는 정답도 거부. 단일 서버 메모리 구현이다(PP-09). | NFR-11, SA-03 |
 | SP-09 | 로그는 `pino` 구조화 JSON. 5xx는 요청 경로·시각과 함께 기록하고 스택은 로그에만 남기며 응답에 넣지 않는다. `password`, `Authorization`, `Cookie`, `Set-Cookie`, 토큰 필드는 `redact` 처리해 로그에 남기지 않는다. | NFR-05, NFR-12 |
 | SP-10 | DB 접속은 `db/pool.js`의 `pg.Pool` 하나만 쓴다. 최대 연결 수·타임아웃은 환경 변수로 받고(기본값은 NFR-01 부하 테스트로 조정), 풀 `error` 이벤트를 로깅한다. 수동 클라이언트(`pool.connect()`)는 트랜잭션 헬퍼에서만 쓰고 `finally`에서 반드시 반환한다. | NFR-04, R-02 |
@@ -240,8 +242,8 @@
 | backend | `DB_POOL_MAX` | 풀 최대 연결 수 | 아니오 |
 | backend | `JWT_SECRET` | Access Token(HS384) 서명 키. 64자 이상 | 예 |
 | backend | `BCRYPT_COST` | 해시 비용(R-03 조정용) | 아니오 |
-| backend | `FRONTEND_ORIGIN` | CORS 허용 출처 | 아니오 |
-| frontend | `VITE_API_BASE_URL` | API 기준 경로(기본 `/api`) | 아니오 |
+| backend | `FRONTEND_ORIGIN` | CORS 허용 출처. 쉼표로 여러 개, 각 값은 경로·끝 슬래시 없는 출처 형식. 개발 기본 `http://localhost:5173`, 운영(`production`)은 필수(없으면 기동 실패) | 아니오 |
+| frontend | `VITE_API_BASE_URL` | API 기준 URL. 다른 출처이므로 절대 URL(개발 `http://localhost:3000/api`, 운영은 API 출처 + `/api`) | 아니오 |
 
 토큰 만료(Access 15분, Refresh 7일)는 env가 아니라 `lib/jwt.js`의 상수다(PP-22).
 
@@ -386,7 +388,7 @@ backend/
 |----|------|------|
 | PP-01 | 가정 | 패키지 매니저는 npm, Node.js는 LTS 최신 버전. 루트 `package.json`·워크스페이스 없이 `backend/`, `frontend/`가 독립 패키지다(LP-15, CP-01). |
 | PP-02 | 가정 | 백엔드는 ESM(`"type": "module"`) + Express 5, 빌드 단계 없이 `node`로 직접 실행한다(개발은 `node --watch`, 환경 변수는 `--env-file`). |
-| PP-03 | 가정 | 프론트 빌드·개발 서버는 Vite, 라우팅은 `react-router`. 개발 시 `/api`는 Vite 프록시로 백엔드에 연결한다. |
+| PP-03 | 가정 | 프론트 빌드·개발 서버는 Vite, 라우팅은 `react-router`. 개발 시에도 Vite 프록시를 쓰지 않고 `VITE_API_BASE_URL`로 백엔드를 직접 호출한다(CORS, PP-12). |
 | PP-04 | 가정 | 검증 라이브러리는 **zod**를 프론트·백엔드 양쪽에 쓴다(백엔드는 JS라 런타임 검증이 유일한 방어선). 스키마 공유 패키지는 만들지 않으며 각자 선언한다. 폼 라이브러리는 쓰지 않는다. |
 | PP-05 | 가정 | 테스트 러너는 양쪽 모두 **Vitest**(`@vitest/coverage-v8`). 백엔드 통합 테스트는 실제 PostgreSQL 17 `_test` DB를 쓴다(로컬 설치 또는 컨테이너는 개발자 선택, TP-04). |
 | PP-06 | 가정 | 상태 판정 단일 출처는 백엔드다. 목록·캘린더 응답은 각 할일의 `status`를 포함하며, 이를 위해 해당 조회는 `today`를 필수 파라미터로 받는다. 프론트는 판정하지 않는다(LP-13). 상세 응답 형태는 API 명세에서 확정한다. |
@@ -395,7 +397,7 @@ backend/
 | PP-09 | 가정 | 로그인 시도 제한은 프로세스 메모리에 둔다. 서버 재시작 시 초기화되고 다중 인스턴스에서는 동작하지 않으며, 단일 서버 전제(PRD 8장)에서 허용한다. 확장 시 DB 테이블로 교체한다. 실패 기록은 마지막 실패 후 5분이 지나면 접근 시 삭제하고, 10,000개를 넘으면 만료분을 일괄 삭제한다(8번 문서 D-07). |
 | PP-10 | 가정 | `bcrypt`(네이티브)를 쓰며 기본 cost는 10, `BCRYPT_COST`로 조정한다(R-03). NFR-03이 미달이면 cost와 libuv 스레드 풀 크기(`UV_THREADPOOL_SIZE`)를 조정한다. 설치가 어려우면 `bcryptjs`로 대체하되 성능을 재측정한다. |
 | PP-11 | 해결 | 로그인 차단 응답은 429(`TOO_MANY_ATTEMPTS`), 인증 실패는 401(`INVALID_CREDENTIALS`), 미인증은 401(`UNAUTHENTICATED`)로 구분한다. 구체 코드 목록은 API 명세에서 확정한다. → `backend/swagger.yaml`의 `ErrorCode`로 확정(8번 문서 PRE-02). |
-| PP-12 | 가정 | 인증 쿠키가 `SameSite=Lax`이므로 운영에서는 프론트 정적 파일과 `/api`를 같은 출처(리버스 프록시 또는 같은 도메인)로 제공한다. CORS 설정(NFR-10)은 출처가 갈리는 경우를 위한 안전장치다. |
+| PP-12 | 해결 | 개발·운영 모두 프론트와 API를 서로 다른 출처로 두고 CORS로 연결한다(프록시 미사용). 허용 출처는 환경 변수 `FRONTEND_ORIGIN`(쉼표로 여러 개, 운영 필수), `credentials: true`(SP-07, NFR-10). 인증 쿠키가 `SameSite=Lax`이므로 두 출처는 같은 사이트(등록 도메인이 같음)여야 한다. 예: 개발 `localhost:5173`↔`localhost:3000`, 운영 `app.example.com`↔`api.example.com`. 다른 사이트로 나누면 쿠키가 전송되지 않는다. |
 | PP-13 | 미결 | date picker는 별도 라이브러리 없이 네이티브 `<input type="date">`를 `DateField`로 감싸 쓴다(값이 `YYYY-MM-DD` 문자열이라 CP-03과 맞음). 와이어프레임 5.3·WA-13의 '직접 입력 불가' 팝업 UI와 브라우저별 모양이 다를 수 있어 확정이 필요하다. 형식·역전 검증은 입력 방식과 무관하게 유지한다. |
 | PP-14 | 해결 | 캘린더 월·주·일 뷰는 라이브러리 없이 직접 구현한다. R-01의 구현 순서(일 → 월 → 주)를 따르고, 기간 막대 배치는 `features/calendar`의 순수 함수로 두어 CV 표로 테스트한다. 캘린더 조회는 별도 리소스가 아니라 할일 기간 조회로 본다(API 명세에서 확정). → `backend/swagger.yaml`에서 `GET /api/todos/calendar`로 확정. |
 | PP-15 | 해결 | 스타일 가이드는 `9-style-guide.md`로 확정했다. 공통 컴포넌트(`components/ui`)는 이 문서의 CSS 변수(`styles/tokens.css`, 3장)를 CSS Modules에서 `var(--...)`로 참조해 구현하며 색상 리터럴을 쓰지 않는다. 상태 색상은 라벨·모양·선 모양의 보조 수단이다(WA-19). |

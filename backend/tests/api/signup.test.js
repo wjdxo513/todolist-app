@@ -53,6 +53,9 @@ describe('POST /api/auth/signup (BE-06)', () => {
 
     it('이메일 형식 오류', () => bad({ ...valid, email: 'not-an-email' }, 'email'));
     it('비밀번호 7자 거부', () => bad({ ...valid, password: '1234567' }, 'password'));
+    // bcrypt 72바이트 절단 방지: 한글 25자 = 75바이트
+    it('비밀번호 72바이트 초과 거부', () =>
+      bad({ ...valid, password: '가'.repeat(25) }, 'password'));
     it('이름 빈 값 거부', () => bad({ ...valid, name: '' }, 'name'));
     it('이름 51자 거부', () => bad({ ...valid, name: 'a'.repeat(51) }, 'name'));
     it('필수 누락', async () => {
@@ -65,6 +68,8 @@ describe('POST /api/auth/signup (BE-06)', () => {
   it('비밀번호 8자·이름 50자 허용', async () => {
     const res = await post({ ...valid, password: '12345678', name: 'a'.repeat(50) });
     expect(res.status).toBe(201);
+    const max = await post({ ...valid, email: 'max@example.com', password: 'a'.repeat(72) });
+    expect(max.status).toBe(201);
   });
 
   it('알 수 없는 필드(id, isDefault)는 무시', async () => {

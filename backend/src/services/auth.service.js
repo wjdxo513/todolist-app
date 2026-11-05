@@ -39,12 +39,13 @@ export async function logIn({ email, password }) {
       '로그인 시도가 5회 실패했습니다. 5분 후 다시 시도해 주세요.',
     );
   }
+  // 비교 전에 먼저 실패로 집계해야 동시 요청이 차단 검사를 함께 통과하지 못한다. 성공 시 reset.
+  loginAttempts.recordFailure(email);
   const found = await users.findAuthByEmail(email);
   const ok = found
     ? await verifyPassword(password, found.passwordHash)
     : await verifyDummy(password);
   if (!ok) {
-    loginAttempts.recordFailure(email);
     throw new AppError(401, 'INVALID_CREDENTIALS', '이메일 또는 비밀번호가 올바르지 않습니다.');
   }
   loginAttempts.reset(email);

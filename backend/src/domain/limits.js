@@ -4,5 +4,6 @@ export const LIMITS = Object.freeze({
   CATEGORY_NAME_MAX: 20,
   USER_NAME_MAX: 50,
   PASSWORD_MIN: 8,
+  PASSWORD_MAX_BYTES: 72,
   EMAIL_MAX: 255,
 });

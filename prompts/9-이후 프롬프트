@@ -1,0 +1,11 @@
+백엔드 API에 Health Check Enppoint 작성되어있어?
+
+health check endpoint에 DB연결상태도 추가해줘.
+
+현재 백엔드API의 상태를 반영해 @backend/swagger.yaml 을 업데이트하고 Swagger UI가 개발환경에서만 나타나도록 코드를 적용해줘.
+
+사용자 시나리오를 기반으로 백엔드 API에 대한 테스트를 curl 명령어를 이용해서 수행해줘.
+
+Cross Origin 문제를 해결하기 위해 이 프로젝트에서는 Proxy 방식, CORS 방식 중 어떤 방식을 적용하고 있어?
+
+CORS 오리진을 환경변수로 설정하도록 업데이트해줘.

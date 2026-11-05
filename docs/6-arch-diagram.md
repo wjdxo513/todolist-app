@@ -12,6 +12,7 @@
 | v0.6 | 2026-11-04 | jtaewu | 초안 | API 명세 확정(PRE-02) 반영: AD-01·03·04·07·08·11 해결 |
 | v0.7 | 2026-11-04 | jtaewu | 초안 | AD-12·AD-14 해결(8번 문서 D-10) |
 | v0.8 | 2026-11-04 | jtaewu | 초안 | AD-05·AD-16 해결(8번 문서 D-07·D-16) |
+| v0.9 | 2026-11-05 | jtaewu | 초안 | 개발·운영 CORS 방식 반영(5번 v0.8 PP-12) |
 
 ## 변경 이력
 
@@ -35,10 +36,13 @@
 | v0.7 | 2026-11-04 | 8장 | 수정 | AD-12(미들웨어 등록 순서)·AD-14(`validators → domain` 허용) 해결 | jtaewu |
 | v0.8 | 2026-11-04 | 머리말 | 수정 | 기준 문서 버전 갱신(5번 v0.7) | jtaewu |
 | v0.8 | 2026-11-04 | 8장 | 수정 | AD-05(실패 기록 정리)·AD-16(로그인 시 정리와 INSERT 분리) 해결 | jtaewu |
+| v0.9 | 2026-11-05 | 머리말 | 수정 | 기준 문서 버전 갱신(5번 v0.8) | jtaewu |
+| v0.9 | 2026-11-05 | 2장 | 수정 | 같은 출처 진입점·Vite 프록시 삭제, 프론트·API 다른 출처 CORS 연결로 구성도·표 변경 | jtaewu |
+| v0.9 | 2026-11-05 | 8장 | 수정 | AD-02 문구를 CORS 구성에 맞게 정리 | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.6), `3-user-scenario.md`(v0.5), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.7)를 기준으로 한다. 데이터 모델은 `7-erd.md`(v0.4)를 따른다. 아키텍처는 5번 문서와 일치해야 하며, 충돌하면 5번이 우선한다.
+> 본 문서는 `1-domain-definition.md`(v0.3), `2-PRD.md`(v0.6), `3-user-scenario.md`(v0.5), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.8)를 기준으로 한다. 데이터 모델은 `7-erd.md`(v0.4)를 따른다. 아키텍처는 5번 문서와 일치해야 하며, 충돌하면 5번이 우선한다.
 
 ## 1. 개요
 
@@ -58,7 +62,7 @@
 
 ## 2. 배포 구성도
 
-단일 서버 1대 + DB 1대 구성이다(PRD 8장). 인증 쿠키가 `SameSite=Lax`이므로 프론트 정적 자원과 `/api`는 같은 출처로 제공한다(PP-12, SP-07).
+단일 서버 1대 + DB 1대 구성이다(PRD 8장). 개발·운영 모두 프론트와 API는 서로 다른 출처이며 CORS로 연결한다(프록시 미사용). 인증 쿠키가 `SameSite=Lax`이므로 두 출처는 같은 사이트여야 한다(PP-12, SP-07).
 
 ```mermaid
 flowchart LR
@@ -66,10 +70,9 @@ flowchart LR
         B["브라우저<br/>React SPA<br/>쿠키 access_token, refresh_token<br/>HttpOnly, SameSite=Lax"]
     end
 
-    subgraph SERVER["서버 1대 - 같은 출처"]
-        EP["같은 출처 진입점<br/>리버스 프록시 또는 같은 도메인<br/>PP-12"]
-        STATIC["프론트 정적 자원<br/>Vite 빌드 결과"]
-        API["Express 5 API 프로세스<br/>node 직접 실행, ESM<br/>api 경로 전체, 헬스체크 인증 없음"]
+    subgraph SERVER["서버 1대 - 같은 사이트, 다른 출처"]
+        STATIC["프론트 출처<br/>Vite 빌드 결과 정적 자원<br/>FRONTEND_ORIGIN"]
+        API["API 출처<br/>Express 5 API 프로세스<br/>node 직접 실행, ESM<br/>cors FRONTEND_ORIGIN credentials<br/>헬스체크 인증 없음"]
         MEM["프로세스 메모리<br/>로그인 시도 기록<br/>PP-09"]
         API --- MEM
     end
@@ -78,20 +81,18 @@ flowchart LR
     MIG["scripts/migrate.js<br/>순번 SQL 마이그레이션<br/>SP-11"]
     K6["loadtest k6<br/>TP-08, 수동 실행"]
 
-    B -->|"HTTPS 운영, 정적 자원 요청"| EP
-    EP --> STATIC
-    B -->|"api 요청 + 쿠키 자동 전송"| EP
-    EP -->|"api 경로 전달"| API
+    B -->|"HTTPS 운영, 정적 자원 요청"| STATIC
+    B -->|"CORS api 요청, credentials include로 쿠키 전송"| API
     API -->|"pg.Pool 1개, 파라미터 바인딩 SQL"| DB
     MIG -.->|"배포 시 순번 적용"| DB
-    K6 -.->|"PA-07 조건 부하"| EP
+    K6 -.->|"PA-07 조건 부하"| API
 ```
 
 | 항목 | 내용 | 근거 |
 |------|------|------|
-| 같은 출처 | 진입점이 정적 자원과 `/api`를 같은 출처로 제공한다. CORS는 `FRONTEND_ORIGIN` 하나만 허용하는 안전장치다 | PP-12, SP-07, NFR-10 |
-| 정적 자원 제공 주체 | 리버스 프록시인지 Express인지, TLS 종단 위치는 문서에 없다 | AD-02 |
-| 개발 환경 | Vite 개발 서버가 `/api`를 백엔드로 프록시한다 | PP-03 |
+| 출처 구성 | 프론트와 API는 같은 사이트의 서로 다른 출처다(예: `app.example.com`↔`api.example.com`). API는 CORS로 `FRONTEND_ORIGIN`(쉼표로 여러 개, 운영 필수)에 지정한 출처만 `credentials: true`로 허용한다. 다른 사이트로 나누면 `SameSite=Lax` 쿠키가 전송되지 않는다 | PP-12, SP-07, NFR-10 |
+| 정적 자원 제공 주체 | 정적 자원 호스팅 방식과 TLS 종단 위치는 문서에 없다 | AD-02 |
+| 개발 환경 | 프록시 없이 Vite 개발 서버(`localhost:5173`)가 `VITE_API_BASE_URL`(`http://localhost:3000/api`)로 백엔드를 직접 호출한다 | PP-03 |
 | 인증 쿠키 | `access_token`(JWT HS384, 15분, `Path=/`)과 `refresh_token`(불투명, 7일, `Path=/api/auth`). 운영 `Secure`. JS에서 접근 불가 | PA-01, SP-03, NFR-10 |
 | 로그인 차단 | 프로세스 메모리. 재시작 시 초기화, 단일 인스턴스 전제 | PP-09, SP-08 |
 | DB 접속 | `pg.Pool` 하나, `date`(OID 1082)는 문자열로 파싱 | SP-10, NP-18 |
@@ -902,7 +903,7 @@ sequenceDiagram
 | ID | 구분 | 내용 |
 |----|------|------|
 | AD-01 | 해결 | API 명세가 없어 엔드포인트 경로·메서드·요청 필드명·상태 필터 값 표기가 확정되지 않았다(NP-13, PP-11, PP-14, PP-21 참조). 본 문서는 동작 이름으로 적고 NP-13에 예시가 있는 `/api/todos`, `/api/todos/:id`만 경로를 썼다. 카테고리 삭제의 `/api/categories/:id`는 NP-13 규칙에서 유추한 표기다. → API 명세는 `backend/swagger.yaml`로 확정(8번 문서 PRE-02). 경로는 그 파일을 따른다. |
-| AD-02 | 미결 | 프론트 정적 자원을 리버스 프록시와 Express 중 누가 제공하는지, TLS 종단 위치가 없다. PP-12는 '리버스 프록시 또는 같은 도메인'까지만 정한다. 2장 구성도는 이 둘을 '같은 출처 진입점'으로 묶었다. |
+| AD-02 | 미결 | 프론트 정적 자원 호스팅 방식과 TLS 종단 위치가 없다. PP-12는 '같은 사이트의 서로 다른 출처, CORS 연결'까지만 정한다(v0.9에서 같은 출처 진입점 전제 삭제). |
 | AD-03 | 해결 | 완료 토글(WA-10)이 편집과 같은 요청(전체 수정)인지 별도 부분 수정인지 정해지지 않았다. 부분 수정이면 BR-05(종료일 ≥ 시작일)를 zod만으로 검증할 수 없고 서비스에서 기존 값과 비교해야 한다. 6.5는 전체 수정 기준으로 그렸다(PP-06 참조). → 별도 부분 수정 `PATCH /api/todos/{id}/completion`(`isCompleted`만)으로 결정. 날짜를 바꾸지 않아 BR-05 재검증이 필요 없다. |
 | AD-04 | 해결 | 비밀번호 변경 시 현재 비밀번호 불일치의 상태 코드·`code`가 없다(400, 409 등). 401로 하면 LP-09의 `UNAUTHENTICATED` 이동 규칙과 코드로 구분해야 한다(PP-11 참조). 같은 이유로 BR-08 위반 등 409 `code` 세부 목록도 API 명세 대기다. → 400 `VALIDATION_ERROR` + `fields.currentPassword`로 결정. 409 `code`는 `EMAIL_ALREADY_EXISTS`, `CATEGORY_NAME_DUPLICATE`, `DEFAULT_CATEGORY_PROTECTED`, `CATEGORY_IN_USE`. |
 | AD-05 | 해결 | 로그인 차단 세부: 차단 중 추가 시도가 차단 시간을 연장하는지, 차단 해제 후 횟수 초기화 방식, 실패 기록의 만료·정리 정책이 없다. 없는 이메일도 집계(SA-03)하므로 임의 이메일로 메모리가 계속 늘 수 있다(PP-09는 재시작·다중 인스턴스 한계만 다룸). → 차단 중 시도는 연장하지 않고, 해제 후 횟수 0으로 초기화하는 것으로 결정(API 명세 D-07). 실패 기록의 만료·정리 정책만 남았다(BE-07). 정리 정책도 결정: 마지막 실패 후 5분 지난 기록은 접근 시 삭제, 10,000개 초과 시 만료분 일괄 삭제(8번 문서 D-07). |

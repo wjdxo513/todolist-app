@@ -124,4 +124,15 @@ describe('errorHandler (NP-15, NFR-12)', () => {
     expect(big.status).toBe(400);
     expect(big.body.error.code).toBe('VALIDATION_ERROR');
   });
+
+  it('지원하지 않는 charset 등 body-parser 4xx도 400이고 error 로그 없음', async () => {
+    const spy = vi.spyOn(logger, 'error').mockImplementation(() => {});
+    const res = await request(makeApp())
+      .post('/v')
+      .set('Content-Type', 'application/json; charset=latin1')
+      .send('{"title":"a","n":1}');
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
+    expect(spy).not.toHaveBeenCalled();
+  });
 });

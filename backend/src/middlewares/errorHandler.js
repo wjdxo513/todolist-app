@@ -12,7 +12,8 @@ export function errorHandler(err, req, res, next) {
   if (err instanceof AppError) {
     status = err.status;
     body = { code: err.code, message: err.message, ...(err.fields && { fields: err.fields }) };
-  } else if (err?.type === 'entity.parse.failed' || err?.type === 'entity.too.large') {
+  } else if (err?.expose && err.status >= 400 && err.status < 500) {
+    // body-parser의 클라이언트 오류(파싱 실패·크기 초과·charset 등)
     status = 400;
     body = { code: 'VALIDATION_ERROR', message: '입력값을 확인해 주세요.' };
   }
