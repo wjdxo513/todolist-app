@@ -10,11 +10,12 @@ try {
 
 export default defineConfig({
   test: {
+    setupFiles: ['./tests/setup.js'],
     fileParallelism: false, // 공유 테스트 DB (TP-04)
     coverage: {
       provider: 'v8',
       include: ['src/**', 'scripts/**'],
-      exclude: ['src/server.js', '*.config.js'],
+      exclude: ['src/server.js', '*.config.js', '**/*.test.js', 'tests/**'],
       thresholds: { lines: 90, functions: 90, branches: 90, statements: 90 },
     },
   },

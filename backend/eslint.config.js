@@ -19,5 +19,5 @@ export default [
   ban(['src/routes/**'], ['**/services/**', '**/repositories/**', '**/db/**']),
   ban(['src/services/**'], ['**/controllers/**', '**/routes/**']),
   ban(['src/repositories/**'], ['**/services/**', '**/controllers/**', '**/routes/**']),
-  ban(['src/domain/**'], ['./*', '../*']),
+  ban(['src/domain/**/!(*.test).js'], ['./*', '../*']),
 ];

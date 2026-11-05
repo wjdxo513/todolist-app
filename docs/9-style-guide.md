@@ -14,7 +14,7 @@
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
-> 본 문서는 `1-domain-definition.md`(v0.3), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.6), `8-plan.md`(v0.8)를 기준으로 한다. 화면 구성·상태 판정 규칙은 재정의하지 않고 해당 문서를 참조한다.
+> 본 문서는 `1-domain-definition.md`(v0.3), `4-wireframe.md`(v0.4), `5-project-principle.md`(v0.7), `8-plan.md`(v0.11)를 기준으로 한다. 화면 구성·상태 판정 규칙은 재정의하지 않고 해당 문서를 참조한다.
 
 ## 1. 개요
 

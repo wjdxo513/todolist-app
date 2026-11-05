@@ -9,7 +9,8 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "migrate": "node --env-file=.env scripts/migrate.js"
+    "migrate": "node --env-file=.env scripts/migrate.js",
+    "seed:loadtest": "node --env-file=.env scripts/seed-loadtest.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
