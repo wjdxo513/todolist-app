@@ -24,3 +24,7 @@ export function createApp() {
   app.use(errorHandler);
   return app;
 }
+
+// Vercel 서버리스 진입점(Vercel은 이 파일의 기본 내보내기를 요청 핸들러로 쓴다). 첫 요청 때 한 번만 앱 생성
+let vercelApp;
+export default (req, res) => (vercelApp ??= createApp())(req, res);
