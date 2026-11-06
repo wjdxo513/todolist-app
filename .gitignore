@@ -69,6 +69,8 @@ web_modules/
 .env
 .env.*
 !.env.example
+# 프론트 .env는 공개 API 주소만 있어 커밋한다(비밀값 금지: VITE_ 변수는 번들에 노출됨)
+!frontend/.env
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

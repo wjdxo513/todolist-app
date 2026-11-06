@@ -14,7 +14,7 @@
 | v0.8 | 2026-11-05 | jtaewu | 초안 | 개발·운영 모두 CORS 방식으로 변경(프록시 미사용), PP-12 해결 |
 | v0.9 | 2026-11-05 | jtaewu | 초안 | 프론트 구현(FE-01~17) 반영: PP-13 해결, LP-11 쿼리 키 위치, 6.2 디렉토리 구조. 코드 대조 반영: 레이어·라이브러리·네이밍·테스트·운영 규칙, 6.1·6.3 트리, PP-02~10·18·20·22 해결 |
 | v0.10 | 2026-11-05 | jtaewu | 초안 | 프론트 개발 모드 전용 로깅(lib/logger.ts), import.meta.env 진입점 lib/env.ts |
-| v0.11 | 2026-11-06 | jtaewu | 초안 | 6.1 트리에 E2E 점검 결과 폴더 test/e2e/ 추가, .gitignore 설명 갱신 |
+| v0.11 | 2026-11-06 | jtaewu | 초안 | 6.1 트리에 E2E 점검 결과 폴더 test/e2e/ 추가, .gitignore 설명 갱신, SP-02 frontend/.env 커밋 예외 |
 
 ## 변경 이력
 
@@ -50,7 +50,8 @@
 | v0.9 | 2026-11-05 | 7장 | 수정 | 코드로 확정된 PP-02~PP-10·PP-18·PP-20·PP-22를 해결로 변경(PP-09 선집계 구현 명시) | jtaewu |
 | v0.10 | 2026-11-05 | 5장 | 수정 | SP-01: 프론트 `import.meta.env`는 `lib/env.ts`, 개발 모드 전용 로깅 규칙 | jtaewu |
 | v0.10 | 2026-11-05 | 6장 | 수정 | 6.2 `lib/`에 env.ts·logger.ts 추가 | jtaewu |
-| v0.11 | 2026-11-06 | 6장 | 수정 | 6.1 트리: `test/e2e/`(INT-01 점검 리포트·캡처) 추가, `.gitignore`에 `.playwright-mcp/` 무시 반영 | jtaewu |
+| v0.11 | 2026-11-06 | 6장 | 수정 | 6.1 트리: `test/e2e/`(INT-01 점검 리포트·캡처) 추가, `.gitignore`에 `.playwright-mcp/` 무시·`frontend/.env` 허용 반영 | jtaewu |
+| v0.11 | 2026-11-06 | 5장 | 수정 | SP-02: `frontend/.env` 커밋 예외, `.env.example` 접속 문자열 형식 | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
@@ -238,7 +239,7 @@
 | ID | 원칙 | 근거 |
 |----|------|------|
 | SP-01 | 환경 변수는 `backend/src/config/env.js` 한 곳에서만 읽고 zod로 검증하며, 누락·형식 오류면 서버 시작을 중단한다(`process.env` 직접 접근 금지). 프론트는 `import.meta.env`를 `lib/env.ts` 한 모듈에서만 읽는다. 프론트 콘솔 로그는 `lib/logger.ts`로만 남기고 개발 서버(`DEV`이면서 test 모드가 아님)에서만 출력하며, 요청 본문·비밀번호·이메일은 기록하지 않는다. | NFR-12 |
-| SP-02 | 비밀값(`.env`)은 커밋하지 않는다. 패키지마다 `.env.example`(값은 예시·빈 값)을 두고, 변수를 추가·삭제하면 같은 커밋에서 갱신한다. 프론트 `VITE_*` 값은 브라우저에 노출되므로 비밀을 넣지 않는다. | NFR-05, `.gitignore` |
+| SP-02 | 비밀값(`backend/.env`)은 커밋하지 않는다. 예외로 `frontend/.env`는 공개 API 주소만 담으므로 커밋한다. 패키지마다 `.env.example`(값은 예시·빈 값, 접속 문자열은 비밀번호 자리를 `CHANGE_ME`로 둔 형식)을 두고, 변수를 추가·삭제하면 같은 커밋에서 갱신한다. 프론트 `VITE_*` 값은 브라우저에 노출되므로 비밀을 넣지 않는다. | NFR-05, `.gitignore` |
 | SP-03 | **JWT·쿠키:** Access Token은 JWT(`HS384`, 만료 15분, 페이로드 `sub`·`iat`·`exp`)이고 쿠키 `access_token`(`HttpOnly`, `SameSite=Lax`, `Path=/`, 운영 `Secure`, `Max-Age` 15분)으로 보낸다. 서명 때 알고리즘을 명시하고, 검증 때 허용 알고리즘을 `['HS384']`로 고정해 다른 알고리즘과 `none`을 거부한다. Refresh Token은 `crypto.randomBytes(32)`의 base64url 불투명 문자열이며 DB에는 SHA-256 해시만 저장하고(원문 저장·로그 금지), 쿠키 `refresh_token`(`HttpOnly`, `SameSite=Lax`, `Path=/api/auth`, 운영 `Secure`, `Max-Age` 7일)으로 보낸다. 토큰은 JS가 접근할 수 없으며 `localStorage`·`sessionStorage`에 저장하지 않는다. 로그아웃·갱신 실패는 발급 때와 같은 속성으로 두 쿠키를 만료시킨다. 로그아웃은 Refresh 행을 삭제한다. 이미 발급된 Access Token은 최대 15분 유효하다(PA-01 한계). `JWT_SECRET`은 64자 이상(48바이트 무작위 값의 base64)을 시작 시 검증한다. 갱신 시 `refresh_token` 쿠키의 `Max-Age`는 다시 7일로 설정되어 서버 절대 만료(ER-14)보다 쿠키가 오래 남을 수 있으나, 서버가 만료 행을 거부하므로 기능 영향이 없어 그대로 둔다. | PA-01, NFR-10, FR-11 |
 | SP-04 | 비밀번호는 `bcrypt`로만 저장·비교한다. 평문을 저장·로그·응답에 쓰지 않는다. 없는 이메일 로그인에도 더미 해시 비교를 수행해 응답 시간 차로 존재 여부가 드러나지 않게 한다. | PA-02, NFR-05, FR-02 |
 | SP-05 | SQL 값은 파라미터 바인딩(`$n`)만 쓴다. 문자열 연결·템플릿 삽입 금지. 정렬 컬럼 등 동적 식별자가 필요하면 코드 내 화이트리스트 매핑만 허용한다. | NFR-07 |
@@ -273,7 +274,7 @@
 todolist-app/
 ├─ .claude/                 # skills/(develop-backend, develop-frontend), agents/, CLAUDE.md (기존)
 ├─ .editorconfig            # 공통 포맷 설정
-├─ .gitignore               # .env, .env.* 무시(!.env.example 허용), .playwright-mcp/ 무시
+├─ .gitignore               # .env, .env.* 무시(.env.example·frontend/.env 허용), .playwright-mcp/ 무시
 ├─ .prettierrc              # 공통 Prettier 설정
 ├─ docs/                    # 1~9번 문서, schema.sql
 ├─ prompts/                 # 문서 생성 프롬프트 (기존)
