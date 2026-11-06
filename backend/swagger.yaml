@@ -11,6 +11,7 @@
 # | v0.5 | 2026-11-05 | jtaewu | 확정 | 구현(BE-17 완료 시점) 동기화: 쿠키 헤더 실제 형식, 정수 상한, 오류 응답 세부, 개발 전용 Swagger UI |
 # | v0.6 | 2026-11-05 | jtaewu | 확정 | servers 설명을 CORS 방식으로 변경(Vite 프록시 삭제, PP-12) |
 # | v0.7 | 2026-11-05 | jtaewu | 확정 | 구현 대조 반영: 본문 파서 오류가 인증보다 먼저인 점, 갱신 쿠키 Max-Age, `fields._` 조건, 기준 문서 버전 |
+# | v0.8 | 2026-11-06 | jtaewu | 확정 | 기준 문서 버전 갱신. 라우트 17개·에러 code·INT-01 실서버 응답과 대조 결과 경로·스키마 변경 없음 |
 #
 # ## 변경 이력
 #
@@ -30,11 +31,12 @@
 # | v0.7 | 2026-11-05 | 머리말·info | 수정 | 기준 문서 버전 갱신, D-15 설명 정리, 공통 규칙에 본문 파서 오류(400)가 인증보다 먼저임을 명시, info.version 0.7.0 | jtaewu |
 # | v0.7 | 2026-11-05 | paths | 수정 | 로그아웃 '항상 204'에 본문 파서 오류 예외, 갱신의 새 `refresh_token` 쿠키 Max-Age 재설정 | jtaewu |
 # | v0.7 | 2026-11-05 | components | 수정 | `fields._` 조건에 Content-Type이 JSON이 아닌 경우 추가 | jtaewu |
+# | v0.8 | 2026-11-06 | 머리말·info | 수정 | 기준 문서 버전 갱신(5번 v0.11, 6번 v0.11, 7번 v0.6, 8번 v0.17), info.version 0.8.0 | jtaewu |
 #
 # > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다. info.version은 이 표의 최신 버전과 맞춘다.
 #
 # > 본 명세는 `docs/1-domain-definition.md`(v0.4), `docs/2-PRD.md`(v0.7), `docs/3-user-scenario.md`(v0.6), `docs/4-wireframe.md`(v0.5),
-# > `docs/5-project-principle.md`(v0.9), `docs/6-arch-diagram.md`(v0.10), `docs/7-erd.md`(v0.5), `docs/8-plan.md`(v0.15), `docs/schema.sql`을 기준으로 한다.
+# > `docs/5-project-principle.md`(v0.11), `docs/6-arch-diagram.md`(v0.11), `docs/7-erd.md`(v0.6), `docs/8-plan.md`(v0.17), `docs/schema.sql`을 기준으로 한다.
 # > 규칙·요구사항은 재정의하지 않고 ID(FR/NFR/BR/SN/SP/PP/AD/ER/D 등)로 참조한다.
 #
 # ## 엔드포인트 표
@@ -106,7 +108,7 @@
 openapi: 3.0.3
 info:
   title: TodoList API
-  version: 0.7.0
+  version: 0.8.0
   description: |
     인증된 사용자가 할일을 카테고리·기간(시작일~종료일)으로 관리하고 월/주/일 캘린더로 조회하는 TodoList 백엔드 API.
     버전 이력은 파일 상단 주석 참조.

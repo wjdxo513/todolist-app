@@ -14,6 +14,7 @@
 | v0.8 | 2026-11-05 | jtaewu | 초안 | 개발·운영 모두 CORS 방식으로 변경(프록시 미사용), PP-12 해결 |
 | v0.9 | 2026-11-05 | jtaewu | 초안 | 프론트 구현(FE-01~17) 반영: PP-13 해결, LP-11 쿼리 키 위치, 6.2 디렉토리 구조. 코드 대조 반영: 레이어·라이브러리·네이밍·테스트·운영 규칙, 6.1·6.3 트리, PP-02~10·18·20·22 해결 |
 | v0.10 | 2026-11-05 | jtaewu | 초안 | 프론트 개발 모드 전용 로깅(lib/logger.ts), import.meta.env 진입점 lib/env.ts |
+| v0.11 | 2026-11-06 | jtaewu | 초안 | 6.1 트리에 E2E 점검 결과 폴더 test/e2e/ 추가, .gitignore 설명 갱신 |
 
 ## 변경 이력
 
@@ -49,6 +50,7 @@
 | v0.9 | 2026-11-05 | 7장 | 수정 | 코드로 확정된 PP-02~PP-10·PP-18·PP-20·PP-22를 해결로 변경(PP-09 선집계 구현 명시) | jtaewu |
 | v0.10 | 2026-11-05 | 5장 | 수정 | SP-01: 프론트 `import.meta.env`는 `lib/env.ts`, 개발 모드 전용 로깅 규칙 | jtaewu |
 | v0.10 | 2026-11-05 | 6장 | 수정 | 6.2 `lib/`에 env.ts·logger.ts 추가 | jtaewu |
+| v0.11 | 2026-11-06 | 6장 | 수정 | 6.1 트리: `test/e2e/`(INT-01 점검 리포트·캡처) 추가, `.gitignore`에 `.playwright-mcp/` 무시 반영 | jtaewu |
 
 > 구분: 신규 / 추가 / 수정 / 삭제. 버전을 올릴 때는 '버전 이력'에 한 줄을 추가하고, 세부 변경 사항은 '변경 이력'에 섹션 단위로 기록한다.
 
@@ -271,12 +273,13 @@
 todolist-app/
 ├─ .claude/                 # skills/(develop-backend, develop-frontend), agents/, CLAUDE.md (기존)
 ├─ .editorconfig            # 공통 포맷 설정
-├─ .gitignore               # .env, .env.* 무시, !.env.example 허용 (기존)
+├─ .gitignore               # .env, .env.* 무시(!.env.example 허용), .playwright-mcp/ 무시
 ├─ .prettierrc              # 공통 Prettier 설정
 ├─ docs/                    # 1~9번 문서, schema.sql
 ├─ prompts/                 # 문서 생성 프롬프트 (기존)
 ├─ backend/                 # 6.3
 ├─ frontend/                # 6.2
+├─ test/e2e/                # INT-01 E2E 점검 리포트(report.md)·캡처(screenshots/)
 └─ loadtest/                # k6 스크립트 (TP-08, INT-02에서 생성 예정)
 ```
 
