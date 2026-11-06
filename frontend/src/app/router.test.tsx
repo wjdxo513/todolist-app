@@ -1,8 +1,9 @@
 import { screen, waitFor } from '@testing-library/react';
 import { http } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { MESSAGES } from '../lib/messages';
 import { ProfilePage } from '../pages/ProfilePage';
+import { RouteError } from './RouteError';
 import { API, db, err } from '../test/handlers';
 import { renderApp, renderWithProviders } from '../test/renderWithProviders';
 import { server } from '../test/server';
@@ -38,11 +39,25 @@ describe('라우트 가드 (FE-07)', () => {
     await waitFor(() => expect(queryClient.isFetching()).toBe(0));
   });
 
-  it('현재 사용자 조회가 401 외 오류면 공통 오류 문구를 보이고 이동하지 않는다', async () => {
+  it('현재 사용자 조회가 401 외 오류면 대체 화면(새로고침)을 보이고 이동하지 않는다', async () => {
     server.use(http.get(`${API}/users/me`, () => err(500, 'INTERNAL_ERROR', '내부 오류')));
     const { router } = renderApp('/profile');
-    expect(await screen.findByRole('alert')).toHaveTextContent(MESSAGES.generic);
+    expect(await screen.findByRole('alert')).toHaveTextContent('화면을 표시하지 못했습니다.');
+    expect(screen.getByRole('button', { name: '새로고침' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/profile');
+  });
+
+  it('화면 렌더 중 예외가 나면 라우터 기본 오류 화면 대신 대체 화면을 보인다', async () => {
+    const Boom = () => {
+      throw new Error('boom');
+    };
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    renderWithProviders(null, {
+      routes: [{ errorElement: <RouteError />, children: [{ path: '*', element: <Boom /> }] }],
+    });
+    expect(
+      await screen.findByRole('heading', { name: '(!) 화면을 표시하지 못했습니다.' }),
+    ).toBeInTheDocument();
   });
 
   it('ProfilePage는 사용자 정보가 없으면 아무것도 그리지 않는다', async () => {

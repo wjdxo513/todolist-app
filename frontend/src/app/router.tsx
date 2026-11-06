@@ -10,30 +10,37 @@ import { TodoListPage } from '../pages/TodoListPage';
 import { AppLayout } from './AppLayout';
 import { PublicOnly } from './PublicOnly';
 import { RequireAuth } from './RequireAuth';
+import { RouteError } from './RouteError';
 
 export const routes: RouteObject[] = [
   {
-    element: <PublicOnly />,
-    children: [
-      { path: ROUTES.signup, element: <SignupPage /> },
-      { path: ROUTES.login, element: <LoginPage /> },
-    ],
-  },
-  {
-    element: <RequireAuth />,
+    // 하위 어느 화면에서 예외가 나도 대체 화면 표시
+    errorElement: <RouteError />,
     children: [
       {
-        element: <AppLayout />,
+        element: <PublicOnly />,
         children: [
-          { path: ROUTES.todos, element: <TodoListPage /> },
-          { path: ROUTES.todoNew, element: <TodoFormPage /> },
-          { path: ROUTES.todoEdit(':id'), element: <TodoFormPage /> },
-          { path: ROUTES.calendar, element: <CalendarPage /> },
-          { path: ROUTES.categories, element: <CategoriesPage /> },
-          { path: ROUTES.profile, element: <ProfilePage /> },
+          { path: ROUTES.signup, element: <SignupPage /> },
+          { path: ROUTES.login, element: <LoginPage /> },
         ],
       },
+      {
+        element: <RequireAuth />,
+        children: [
+          {
+            element: <AppLayout />,
+            children: [
+              { path: ROUTES.todos, element: <TodoListPage /> },
+              { path: ROUTES.todoNew, element: <TodoFormPage /> },
+              { path: ROUTES.todoEdit(':id'), element: <TodoFormPage /> },
+              { path: ROUTES.calendar, element: <CalendarPage /> },
+              { path: ROUTES.categories, element: <CategoriesPage /> },
+              { path: ROUTES.profile, element: <ProfilePage /> },
+            ],
+          },
+        ],
+      },
+      { path: '*', element: <Navigate to={ROUTES.todos} replace /> },
     ],
   },
-  { path: '*', element: <Navigate to={ROUTES.todos} replace /> },
 ];
